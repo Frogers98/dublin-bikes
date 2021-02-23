@@ -96,7 +96,6 @@ def store():
 
     # Close connection to database
     connection.close()
-store()
 
 def main():
     # Run forever
@@ -109,3 +108,5 @@ def main():
             # Print traceback if there's an error
             print
             traceback.format_exc()
+    if __name__ == "__main__":
+main()
