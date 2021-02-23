@@ -91,11 +91,12 @@ def store():
 
     # Store the pulled data in the database
     # The station table is commented out for now because I don't think it needs to be updated continuously and i've already updated it once
-    #df_station.to_sql(name='01_station', con=connection, if_exists='append', index=False)
+    # df_station.to_sql(name='01_station', con=connection, if_exists='append', index=False)
     df_availability.to_sql(name='01_availability', con=connection, if_exists='append', index=False)
 
     # Close connection to database
     connection.close()
+
 
 def main():
     # Run forever
@@ -106,7 +107,8 @@ def main():
             time.sleep(5 * 60)
         except:
             # Print traceback if there's an error
-            print
-            traceback.format_exc()
- if __name__ == "__main__":
-     main()
+            print(traceback.format_exc())
+
+
+if __name__ == "__main__":
+    main()
