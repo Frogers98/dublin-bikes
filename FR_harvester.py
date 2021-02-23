@@ -87,7 +87,7 @@ def store():
         sql += "{})".format(insert_row)
         engine.execute(sql)
     # Commented out because I've already set it up and it seems redundant for now
-    #setup_tables(db_schema)
+    setup_tables(db_schema)
 
     # Store the pulled data in the database
     # The station table is commented out for now because I don't think it needs to be updated continuously and i've already updated it once
@@ -108,5 +108,5 @@ def main():
             # Print traceback if there's an error
             print
             traceback.format_exc()
-    if __name__ == "__main__":
-main()
+ if __name__ == "__main__":
+     main()
