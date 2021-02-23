@@ -86,7 +86,6 @@ def store():
 
         sql += "{})".format(insert_row)
         engine.execute(sql)
-    # Commented out because I've already set it up and it seems redundant for now
     setup_tables(db_schema)
 
     # Store the pulled data in the database
