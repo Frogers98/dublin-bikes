@@ -878,13 +878,13 @@ def machine_info():
     #total_memory=virtual_memory.total()
 
     print_statement="""
-Your benchmarketing stats are as follows:\n\n
-machine_name = {}
-os_name= {}
-os_version= {}
-host_name= {}
-ip_address= {}
-total_memory= {}\n\n"""
+        Your benchmarketing stats are as follows:\n\n
+        machine_name = {}
+        os_name= {}
+        os_version= {}
+        host_name= {}
+        ip_address= {}
+        total_memory= {}\n\n"""
 
     print(print_statement.format(machine_name
                             ,os_name
