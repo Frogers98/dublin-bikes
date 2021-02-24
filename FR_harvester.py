@@ -105,8 +105,9 @@ def main():
             # Sleep for 5 mins
             time.sleep(5 * 60)
         except:
-            # Print traceback if there's an error
+            # Print traceback and break if there's an error
             print(traceback.format_exc())
+            break
 
 
 if __name__ == "__main__":
