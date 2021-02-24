@@ -756,7 +756,7 @@ def insert_station_static_values(json_data,existing_station_numbers, engine):
         number=entry['number']
         position_lat=entry['position']['lat']
         position_lng=entry['position']['lng']
-        last_update=(dt.datetime.timestamp(entry['last_update'])/1000)
+        last_update=entry['last_update']/1000
         
 
         
