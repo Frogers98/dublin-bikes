@@ -5,9 +5,6 @@ from datetime import datetime
 import requests
 import json
 import pandas as pd
-from pprint import pprint
-import mysql.connector
-import sqlalchemy as sqla
 from sqlalchemy import create_engine
 import time
 
