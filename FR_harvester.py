@@ -5,9 +5,6 @@ from datetime import datetime
 import requests
 import json
 import pandas as pd
-from pprint import pprint
-import mysql.connector
-import sqlalchemy as sqla
 from sqlalchemy import create_engine
 import time
 
@@ -31,6 +28,7 @@ def store():
     df_station = df[['address', 'banking', 'bike_stands', 'bonus', 'contract_name', 'name', 'number', 'position_lat',
                      'position_lng']]
     df_availability = df[['number', 'available_bikes', 'available_bike_stands', 'last_update']]
+    # Convert the time from timestamp to datetime
     df_availability['pull_time'] = pd.to_datetime('now')
 
     # Set database settings
@@ -61,6 +59,37 @@ def store():
             'last_update': 'DATETIME',
             'pull_time': 'DATETIME',
         }
+        , '01_weather': {
+            'entry_id': 'INTEGER'
+            , 'dt': 'BIGINT'
+            , 'weather_id': 'INTEGER'
+            , 'weather_main': 'VARCHAR(256)'
+            , 'coord_lon': 'REAL'
+            , 'coord_lat': 'REAL'
+            , 'main': 'VARCHAR(256)'
+            , 'weather_description': 'VARCHAR(500)'
+            , 'weather_icon': 'VARCHAR(20)'
+            , 'base': 'varchar(256)'
+            , 'main_temp': 'REAL'
+            , 'main_feels_like': 'REAL'
+            , 'main_temp_min': 'REAL'
+            , 'main_temp_max': 'REAL'
+            , 'main_pressure': 'INT'
+            , 'main_humidity': 'INT'
+            , 'visibility': 'INT'
+            , 'wind_speed': 'REAL'
+            , 'wind_deg': 'INT'
+            , 'clouds_all': 'INT'
+            , 'sys_type': 'INT'
+            , 'sys_id': 'INT'
+            , 'sys_country': 'VARCHAR(10)'
+            , 'sys_sunrise': 'BIGINT'
+            , 'sys_sunset': 'BIGINT'
+            , 'timezone': 'INT'
+            , 'id': 'BIGINT'
+            , 'name': 'VARCHAR(256)'
+            , 'cod': 'INT'
+        }
     }
 
     # Set up database connection
@@ -88,10 +117,37 @@ def store():
         engine.execute(sql)
     setup_tables(db_schema)
 
+    def getWeather(latitude, longitude):
+        """function get weather data for particular co-ordinates"""
+        weather_key = "71aa44a6a3a027964138e4aa742c650f"
+        weather_by_coordinates = 'http://api.openweathermap.org/data/2.5/weather'
+        r = requests.get(weather_by_coordinates, params={"APPID": weather_key, "lat": latitude, "lon": longitude})
+        return r.text
+
     # Store the pulled data in the database
     # The station table is commented out for now because I don't think it needs to be updated continuously and i've already updated it once
     # df_station.to_sql(name='01_station', con=connection, if_exists='append', index=False)
     df_availability.to_sql(name='01_availability', con=connection, if_exists='append', index=False)
+
+    # Create a dictionary with all station co-ordinates
+    stations_long = df_station['position_lng']
+    long_list = stations_long.values
+    stations_lat = df_station['position_lat']
+    lat_list = stations_lat.values
+    station_coords_dict = dict(zip(lat_list, long_list))
+
+    # Iterate over this dictionary and call a function to get weather_data for those co-ordinates
+    # Then convert this data to a dataframe and add to the database
+    for lat, long in station_coords_dict.items():
+        weather_response = getWeather(lat, long)
+        weather_data = json.loads(weather_response)
+        # Remove the weather_data from its list so it can be added to dataframe
+        weather_data['weather'] = weather_data['weather'][0]
+        df_weather = pd.json_normalize(weather_data)
+        # Replace the dots to underscores to work better with MySQL
+        df_weather.columns = df_weather.columns.str.replace('.', '_')
+        # Insert into dataframe
+        df_weather.to_sql(name='01_weather', con=connection, if_exists='append', index=False)
 
     # Close connection to database
     connection.close()
@@ -105,8 +161,9 @@ def main():
             # Sleep for 5 mins
             time.sleep(5 * 60)
         except:
-            # Print traceback if there's an error
+            # Print traceback and break if there's an error
             print(traceback.format_exc())
+            break
 
 
 if __name__ == "__main__":
