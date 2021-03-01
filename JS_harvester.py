@@ -77,7 +77,7 @@ def write_to_file(obj):
     with open("availability_{}".format(now_format), "w") as f:
         f.write(obj)
 
-def load_and_store():
+def scrape_and_store():
     meta = MetaData()
     stations = Table(
         "stations", meta,
@@ -136,26 +136,25 @@ def load_and_store():
     station_values = list(map(get_station, r.json()))
     ins_stations = stations.insert().values(station_values)
     engine.execute(ins_stations)
+    write_to_file(r.text)
+    availability_values = list(map(get_availability, r.json()))
+    ins_availability = availability.insert().values(availability_values)
+    engine.execute(ins_availability)
+    for i in station_values:
+        station_num = i["number"]
+        longitude = i["pos_lng"]
+        latitude = i["pos_lat"]
+        weather_values = get_weather(*(str(longitude), str(latitude), station_num))
+        ins_weather = weather.insert().values(weather_values)
+        engine.execute(ins_weather)
+
+def main():
     while True:
         try:
-            r = requests.get(bike_URI, params={"apiKey": bike_key, "contract": contract_name})
-            write_to_file(r.text)
-            availability_values = list(map(get_availability, r.json()))
-            ins_availability = availability.insert().values(availability_values)
-            engine.execute(ins_availability)
-            for i in station_values:
-                station_num = i["number"]
-                longitude = i["pos_lng"]
-                latitude = i["pos_lat"]
-                weather_values = get_weather(*(str(longitude), str(latitude), station_num))
-                ins_weather = weather.insert().values(weather_values)
-                engine.execute(ins_weather)
+            scrape_and_store()
             time.sleep(5 * 60)
         except:
             print(traceback.format_exc())
-
-def main():
-    load_and_store()
 
 if __name__ == "__main__":
     main()
