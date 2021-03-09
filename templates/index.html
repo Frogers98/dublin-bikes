@@ -18,28 +18,22 @@
         fetch("/stations").then(response => {
             return response.json();
         }).then(data => {
-            console.log("data:", data)
-             console.log("in map function")
-        // Make the map (centred on dublin)
-            map = new google.maps.Map(document.getElementById("map"), {
-            center: {lat: 53.349562, lng: -6.278198},
-            zoom: 8,
-        });
-            // Loop through the json array of stations adding markers at each station
-            data.forEach(station => {
-                console.log("in station loop")
-                console.log(station.position_lat)
-                console.log(typeof (station.position_lat))
-                // Code to add markers in for loop adapted from https://stackoverflow.com/questions/3059044/google-maps-js-api-v3-simple-multiple-marker-example
-                new google.maps.Marker({
-                    position: {lat: station.position_lat, lng: station.position_lat},
-                    map: map,
-                });
-            });
-        }).catch(err => {
-            console.log("there's been an error")
-        })
+            console.log("data:", data);
 
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: {lat: 53.349804, lng: -6.260310},
+                zoom: 12,
+            });
+
+            data.forEach(station => {
+                new google.maps.Marker({
+                    position: {lat: station.position_lat, lng: station.position_long},
+                    map: map,
+                })
+            })
+        }).catch(err => {
+            console.log("Oops!", err);
+        })
     }
 
 </script>
