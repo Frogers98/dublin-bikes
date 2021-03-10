@@ -9,15 +9,17 @@
 </head>
 <body>
 <div id="header">
-    <form action="" method='GET'>
-    <label for="stationSelector">Choose a station:</label>
-        <select name="stationSelector" id="stationSelector">
-      {% for county in counties %}
-      <option value="{{ county }}">{{ county }}</option>
-      {% endfor %}
-     </select>
-  <input type="submit" value="Submit">
-</form>
+<!--    <form action="" method='GET'>-->
+<!--    <label for="stationSelector">Choose a station:</label>-->
+<!--        <select name="stationSelector" id="stationSelector">-->
+<!--      {% for county in counties %}-->
+<!--      <option value="{{ county }}">{{ county }}</option>-->
+<!--      {% endfor %}-->
+<!--     </select>-->
+<!--  <input type="submit" value="Submit">-->
+<!--</form>-->
+    <select id="locality-dropdown" name="locality">
+</select>
 </div>
 <div id="map"></div>
 </body>
