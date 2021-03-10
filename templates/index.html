@@ -18,8 +18,10 @@
 <!--     </select>-->
 <!--  <input type="submit" value="Submit">-->
 <!--</form>-->
-    <select id="locality-dropdown" name="locality">
-</select>
+    <!-- <select id="stationSelector" name="locality"> Station Selector</select> -->
+    {% for station in station_data %}
+    <option value="{{ station.name }}">{{ station.name }}</option>
+{% endfor %}
 </div>
 <div id="map"></div>
 </body>
