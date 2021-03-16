@@ -12,12 +12,11 @@
     Choose a station:<select name="stationSelector" id="stationSelector" onchange="filterMarkers(this.value)">
     {% for station in station_data %}
     <option value="{{ station.name }}">{{ station.name }}</option>
-{% endfor %}
-    </select>
+    {% endfor %}
+</select>
 </div>
 <div id="map"></div>
 </body>
-
 
 
 <script

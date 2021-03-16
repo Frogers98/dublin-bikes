@@ -5,7 +5,8 @@ import json
 app = Flask(__name__)
 
 def get_stations_json():
-    """Returns the stations table as a json string"""
+    """Returns the stations table as a json string
+    The other functions can just call this instead of re-using the code in each function"""
     URI = "dublin-bikes.ciu0f2oznjig.us-east-1.rds.amazonaws.com"
     PORT = "3306"
     DB = "dublin_bikes"
@@ -50,15 +51,6 @@ def get_tables():
 
 @app.route("/stations")
 def stations_request():
-    # URI = "dublin-bikes.ciu0f2oznjig.us-east-1.rds.amazonaws.com"
-    # PORT = "3306"
-    # DB = "dublin_bikes"
-    # USER = "admin"
-    # PASSWORD = "DublinBikesProject2201"
-    # engine = create_engine('mysql+mysqlconnector://{}:{}@{}:{}/{}'.format(USER, PASSWORD, URI, PORT, DB, echo=True))
-    #
-    # df = pd.read_sql_table("01_station", engine)
-    # station_json = df.to_json(orient="records")
     print("in /stations")
     stations = get_stations_json()
     return stations
