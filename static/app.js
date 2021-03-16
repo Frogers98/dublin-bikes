@@ -9,12 +9,14 @@
             map = new google.maps.Map(document.getElementById("map"), {
                 center: {lat: 53.349804, lng: -6.260310},
                 zoom: 12,
+                markersArray: [], // Array to hold all markers
             });
-
+           // map.markersArray = [];
             data.forEach(station => {
                 const marker = new google.maps.Marker({
+                    // Add the co-ordinates and name to each marker and specify which map it belongs to
                     position: {lat: station.position_lat, lng: station.position_long},
-                    //label: station.name,
+                    name: station.name,
                     map: map,
                 })
                 marker.addListener("click", () => {
@@ -23,12 +25,38 @@
                     });
                     infowindow.open(map, marker);
                 });
+                map.markersArray.push(marker)
             })
+
+            // This chunk is just for debugging
+            console.log("About to go into for loop")
+        console.log(map.markersArray)
+        for (let i=0; i<=5; i++) {
+           let  current_marker = map.markersArray[i];
+           console.log("Current marker is: " + current_marker.name);
+        }
+
+
         }).catch(err => {
             console.log("Oops!", err);
         })
+
     }
-console.log("TESTING")
+    function filterMarkers(markerName) {
+        // Function to make all markers but the selected marker invisible
+        console.log("In filters marker function");
+        console.log("selected marker is: " + markerName);
+        for (let i=0; i< map.markersArray.length; i++) {
+            let currentMarker = map.markersArray[i];
+            if (markerName == currentMarker.name) {
+                console.log("Marker found!");
+                currentMarker.setVisible(true);
+            }
+            else {
+                currentMarker.setVisible(false);
+            }
+        }
+    }
     // Fill the selector - adapted from https://www.codebyamir.com/blog/populate-a-select-dropdown-list-with-json
 
 //  let dropdown = document.getElementById('stationSelector');
