@@ -51,7 +51,6 @@ database_schema={
                                 ,'datetime':'BIGINT'
                                 ,'sys_type':'INT'
                                 ,'sys_id':'INT'
-                                ,'sys_message':'REAL'
                                 ,'sys_country':'VARCHAR(10)'
                                 ,'sys_sunrise':'BIGINT'
                                 ,'sys_sunset':'BIGINT'
