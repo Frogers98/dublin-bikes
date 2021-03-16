@@ -9,19 +9,11 @@
 </head>
 <body>
 <div id="header">
-<!--    <form action="" method='GET'>-->
-<!--    <label for="stationSelector">Choose a station:</label>-->
-<!--        <select name="stationSelector" id="stationSelector">-->
-<!--      {% for county in counties %}-->
-<!--      <option value="{{ county }}">{{ county }}</option>-->
-<!--      {% endfor %}-->
-<!--     </select>-->
-<!--  <input type="submit" value="Submit">-->
-<!--</form>-->
-    <!-- <select id="stationSelector" name="locality"> Station Selector</select> -->
+    Choose a station:<select name="stationSelector" id="stationSelector">
     {% for station in station_data %}
-    <option value="{{ station.name }}">{{ station.name }}</option>
+    <option value= {{ station.name }}>{{ station.name }}</option>
 {% endfor %}
+    </select>
 </div>
 <div id="map"></div>
 </body>

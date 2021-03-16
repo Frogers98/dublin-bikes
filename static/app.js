@@ -28,7 +28,7 @@
             console.log("Oops!", err);
         })
     }
-
+console.log("TESTING")
     // Fill the selector - adapted from https://www.codebyamir.com/blog/populate-a-select-dropdown-list-with-json
 
 //  let dropdown = document.getElementById('stationSelector');
