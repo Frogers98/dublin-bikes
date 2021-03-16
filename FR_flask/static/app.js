@@ -40,8 +40,13 @@ function filterMarkers(markerName) {
     // Loop through all the markers
     for (let i = 0; i < map.markersArray.length; i++) {
         let currentMarker = map.markersArray[i];
+        // Check if the show all stations option was selected first
+        if (markerName == "showAll") {
+            // Make all markers visible
+             currentMarker.setVisible(true)
+        }
         // Make all markers but the selected marker invisible
-        if (markerName == currentMarker.name) {
+        else if (markerName == currentMarker.name) {
             console.log("Marker found!");
             currentMarker.setVisible(true);
         } else {
