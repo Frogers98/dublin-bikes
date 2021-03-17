@@ -15,8 +15,9 @@ function initMap() {
             const marker = new google.maps.Marker({
                 // Add the co-ordinates and name to each marker and specify which map it belongs to
                 position: {lat: station.position_lat, lng: station.position_long},
-                // Add the station name as an attribute to the marker, this can be used as an identifier
+                // Add the station name and number as attributes to the marker, this can be used as an identifier
                 name: station.name,
+                number: station.number,
                 map: map,
             })
             marker.addListener("click", () => {
@@ -33,20 +34,20 @@ function initMap() {
 
 }
 
-function filterMarkers(markerName) {
+function filterMarkers(markerNumber) {
     // Function to make all markers but the selected marker invisible
     console.log("In filters marker function");
-    console.log("selected marker is: " + markerName);
+    console.log("selected marker is: " + markerNumber);
     // Loop through all the markers
     for (let i = 0; i < map.markersArray.length; i++) {
         let currentMarker = map.markersArray[i];
         // Check if the show all stations option was selected first
-        if (markerName == "showAll") {
+        if (markerNumber == "showAll") {
             // Make all markers visible
              currentMarker.setVisible(true)
         }
         // Make all markers but the selected marker invisible
-        else if (markerName == currentMarker.name) {
+        else if (markerNumber == currentMarker.number) {
             console.log("Marker found!");
             currentMarker.setVisible(true);
         } else {

@@ -32,5 +32,25 @@ def stations_request():
     print("in /stations")
     stations = get_stations_json()
     return stations
+
+@app.route("/availability")
+def availability_request():
+    print("IN AVAILABILITY FUNCTION")
+    URI = "dublin-bikes.ciu0f2oznjig.us-east-1.rds.amazonaws.com"
+    PORT = "3306"
+    DB = "dublin_bikes"
+    USER = "admin"
+    PASSWORD = "DublinBikesProject2201"
+    engine = create_engine('mysql+mysqlconnector://{}:{}@{}:{}/{}'.format(USER, PASSWORD, URI, PORT, DB, echo=True))
+
+    sql = """SELECT * FROM dublin_bikes.01_availability
+    ORDER BY created_date DESC
+    LIMIT 109; """
+    result = engine.execute(sql)
+    print("type of sql request is", type(result))
+    for number, available_bikes, available_bike_stands, last_update, created_date in result:
+        print("number is:", number, "available bikes is:", available_bikes, "available_bike_stands is:", available_bike_stands, "last update is:", last_update, "created date is:", created_date)
+    return "testing availability"
+
 if __name__ == '__main__':
     app.run(debug=True)
