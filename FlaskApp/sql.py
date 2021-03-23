@@ -690,3 +690,16 @@ SQL_select_station_avail_weather_conditionals="""
         AND
         available.created_date=weather.created_date
     """
+
+
+
+SQL_select_limit_availability= """SELECT 
+                                        * 
+                                FROM 
+                                    {}
+                                ORDER BY 
+                                    created_date 
+                                DESC
+                                    LIMIT 109;""".format(
+                                            '01_availability'
+                                    )

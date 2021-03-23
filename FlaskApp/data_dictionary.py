@@ -7,6 +7,23 @@ database_dictionary={
                         ,'port':'3306'    
                     }
 
+
+fr_database_dictionary={
+                        'username':'admin'
+                        ,'password':'DublinBikesProject2201'
+                        ,'database':'dublin_bikes'
+                        ,'endpoint':'dublin-bikes.ciu0f2oznjig.us-east-1.rds.amazonaws.com'
+                        ,'port':'3306'    
+                    }
+
+js_database_dictioanry={
+                        'username':'janeslevin'
+                        ,'password':'js2021dbbikes'
+                        ,'database':'dbbikes30830'
+                        ,'endpoint':'dbbikes30830.cfv8ckdtpwoq.us-east-1.rds.amazonaws.com'
+                        ,'port':'3306'   
+}
+
 database_schema={
                     '01_station':{
                               'address':'VARCHAR(256)'
@@ -49,7 +66,6 @@ database_schema={
                                 ,'wind_degree':'INT'
                                 ,'clouds_all':'INT'
                                 ,'datetime':'BIGINT'
-                                ,'sys_type':'INT'
                                 ,'sys_id':'INT'
                                 ,'sys_country':'VARCHAR(10)'
                                 ,'sys_sunrise':'BIGINT'

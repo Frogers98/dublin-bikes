@@ -53,6 +53,7 @@ import time
 import socket
 import traceback as tb
 import platform
+import json
 
 ######---------BEGIN
 #     DATA VIS
@@ -198,6 +199,57 @@ def station_table_df(host,user,password,port,db):
 
     return df
 
+def availability_limit_df(host,user,password,port,db):
+    """A function to pull the top 109 last updated availability stuff
+    
+    Returns a Json Dump of result
+    """
+
+    print("IN AVAILABILITY FUNCTION")
+
+    engine_l=connect_db_engine(host,user,password,port,db)
+    engine=engine_l[1]
+    result = engine.execute(SQL_select_limit_availability)
+
+    print("type of sql request is", type(result))
+
+    for number, available_bikes, available_bike_stands, last_update, created_date in result:
+        print("number is:", number, "available bikes is:", available_bikes, "available_bike_stands is:", available_bike_stands, "last update is:", last_update, "created date is:", created_date)
+    
+    return json.dumps(result)
+
+
+
+
+def requestStationData(host,user,password,port,db):
+    """A function to Request Station Data and Output as Json"""
+
+    engine_l=connect_db_engine(host,user,password,port,db)
+    engine=engine_l[1]
+
+    # Read sql database table into a dataframe
+    df = pd.read_sql_table("01_station", engine)
+
+    print(df.iloc[1])
+    # Convert to JSON string
+    stationJSON = df.to_json(orient="records")
+
+    return stationJSON
+
+
+def requestStationSQLAData(host,user,password,port,db):
+    """A function to request Station Data using SQLAlchemy
+
+    Returns Keys"""
+
+    engine_l=connect_db_engine(host,user,password,port,db)
+    engine=engine_l[1]
+
+    metadata = sqla.MetaData()
+    station_data = sqla.Table('01_station', metadata, autoload=True, autoload_with=engine)
+
+    print(station_data.columns.keys())
+
 
 def availability_table_df(host,user,password,port,db):
     """Retrieve the station table.
@@ -220,6 +272,26 @@ def availability_table_df(host,user,password,port,db):
 
     engine.dispose()
 
+    return df
+
+
+def availability_recentUpdate(host,user,password,port,db):
+    """Availability from SQL Alchemy Most recent Update limiting 109"""
+    engine = createEngine()
+    engine_l=connect_db_engine(host,user,password,port,db)
+    engine=engine_l[1]
+
+    try:
+        engine.connect()
+
+    except Exception as E:
+        print(E)
+
+    metadata = sqla.MetaData()
+    availability_data = sqla.Table('01_availability', metadata, autoload=True, autoload_with=engine)
+    query = sqla.select([availability_data]).order_by(sqla.desc(availability_data.columns.created_date)).limit(109)
+    df = pd.read_sql_query(query, engine)
+    print(df.iloc[:10])
     return df
 
 def station_availability_df(host,user,password,port,db):
