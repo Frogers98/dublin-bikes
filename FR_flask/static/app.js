@@ -5,7 +5,8 @@ function initMap() {
         return response.json();
     }).then(data => {
         console.log("data:", data);
-
+        var test = getLatestUpdate();
+        console.log("DEBUG IS" + test)
         map = new google.maps.Map(document.getElementById("map"), {
             center: {lat: 53.349804, lng: -6.260310},
             zoom: 12,
@@ -32,6 +33,15 @@ function initMap() {
         console.log("Oops!", err);
     })
 
+}
+
+function getLatestUpdate() {
+    //Function to get the latest update from availability table
+    fetch("/availability").then(response => {
+        return response.json();
+    }).then(availabilityData =>{
+        return availabilityData;
+    })
 }
 
 function filterMarkers(markerNumber) {

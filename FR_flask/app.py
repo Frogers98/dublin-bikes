@@ -2,6 +2,7 @@ from flask import Flask, request, render_template, url_for
 from sqlalchemy import create_engine
 import pandas as pd
 import json
+import pprint
 app = Flask(__name__)
 
 def get_stations_json():
@@ -16,6 +17,10 @@ def get_stations_json():
     print("in get_stations_json()")
     df = pd.read_sql_table("01_station", engine)
     station_json = df.to_json(orient="records")
+    print("station data type:", type(station_json))
+    pp = pprint.PrettyPrinter(indent=4)
+    pp.pprint(station_json)
+    print()
     return station_json
 
 @app.route("/")
@@ -50,7 +55,7 @@ def availability_request():
     print("type of sql request is", type(result))
     for number, available_bikes, available_bike_stands, last_update, created_date in result:
         print("number is:", number, "available bikes is:", available_bikes, "available_bike_stands is:", available_bike_stands, "last update is:", last_update, "created date is:", created_date)
-    return "testing availability"
+    return json.dumps(result)
 
 if __name__ == '__main__':
     app.run(debug=True)
