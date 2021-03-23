@@ -1,0 +1,10 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"python.pythonPath": "/opt/miniconda3/envs/comp30830/bin/python"
+	}
+}
