@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Flask App</title>
+    <meta name="description" content="First index.html">
+    <meta name="author" content="JaneSlevin">
+    <link rel="stylesheet" type="text/css" href="../static/style.css" />
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<div id="header">DUBLIN BIKES</div>
+<select name="stationDropdown" id="stationDropdown" onchange="selectMarker(this.value)">
+    <option value="allStations">Display all stations</option>
+    {% for station in stationDict %}
+    <option value="{{ station.number }}">{{ station.name }}</option>"
+    {% endfor %}
+</select>
+<div id="map"></div>
+</body>
+
+<script>
+
+    let map;
+
+    function initMap() {
+        fetch("/stations").then(response => {
+            return response.json();
+        }).then(data => {
+            console.log("data:", data);
+
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: {lat: 53.349804, lng: -6.260310},
+                zoom: 13.5,
+                markers: [],
+            });
+
+            data.forEach(station => {
+                const marker = new google.maps.Marker({
+                    position: {lat: station.position_lat, lng: station.position_long},
+                    number: station.number,
+                    name: station.name,
+                    map: map,
+                });
+                marker.addListener("click", () => {
+                    const infowindow = new google.maps.InfoWindow({
+                        content: station.name,
+                    });
+                    infowindow.open(map, marker);
+                });
+                map.markers.push(marker);
+            });
+
+        }).catch(err => {
+            console.log("Oops!", err);
+        });
+
+    }
+
+    function selectMarker (stationNumber) {
+        console.log("Selected station: " + stationNumber);
+        for (let i = 0; i < map.markers.length; i++) {
+            let currentMarker = map.markers[i];
+            if (stationNumber == "allStations") {
+                currentMarker.setVisible(true);
+            } else if (stationNumber == currentMarker.number) {
+                currentMarker.setVisible(true);
+            } else {
+                currentMarker.setVisible(false);
+            }
+        }
+    }
+
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDbU4W2J29Zz3Jz8gkcgImNj4YRwgLZCoQ&callback=initMap&libraries=&v=weekly" async></script>
+
+
+</html>
