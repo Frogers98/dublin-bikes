@@ -200,31 +200,6 @@ def station_table_df(host,user,password,port,db):
 
     return df
 
-def availability_limit_df(host,user,password,port,db):
-    """A function to pull the top 109 last updated availability stuff
-    
-    Returns a Json Dump of result
-    """
-
-    print("IN AVAILABILITY FUNCTION")
-
-    engine_l=connect_db_engine(host,user,password,port,db)
-    engine=engine_l[1]
-    result = engine.execute(SQL_select_limit_availability)
-    
-
-
-    print("type of sql request is", type(result))
-
-    for number, available_bikes, available_bike_stands, last_update, created_date in result:
-        print("number is:", number, "available bikes is:", available_bikes, "available_bike_stands is:", available_bike_stands, "last update is:", last_update, "created date is:", created_date)
-    
-    #frontend=json.dumps(result)
-    return 'Check JSON DUMPS'
-
-
-
-
 def get_stations_json(host,user,password,port,db):
     """Returns the stations table as a json string
     The other functions can just call this instead of re-using the code in each function"""
@@ -241,9 +216,6 @@ def get_stations_json(host,user,password,port,db):
     print()
     return station_json
 
-
-
-
 def requestStationData(host,user,password,port,db):
     """A function to Request Station Data and Output as Json"""
 
@@ -259,7 +231,6 @@ def requestStationData(host,user,password,port,db):
 
     return stationJSON
 
-
 def requestStationSQLAData(host,user,password,port,db):
     """A function to request Station Data using SQLAlchemy
 
@@ -272,6 +243,11 @@ def requestStationSQLAData(host,user,password,port,db):
     station_data = sqla.Table('01_station', metadata, autoload=True, autoload_with=engine)
 
     print(station_data.columns.keys())
+
+
+####--------------------------------------
+#04. Get Availability
+####--------------------------------------
 
 
 def availability_table_df(host,user,password,port,db):
@@ -297,6 +273,27 @@ def availability_table_df(host,user,password,port,db):
 
     return df
 
+def availability_limit_df(host,user,password,port,db):
+    """A function to pull the top 109 last updated availability stuff
+    
+    Returns a Json Dump of result
+    """
+
+    print("IN AVAILABILITY FUNCTION")
+
+    engine_l=connect_db_engine(host,user,password,port,db)
+    engine=engine_l[1]
+    result = engine.execute(SQL_select_limit_availability)
+    
+
+
+    print("type of sql request is", type(result))
+
+    for number, available_bikes, available_bike_stands, last_update, created_date in result:
+        print("number is:", number, "available bikes is:", available_bikes, "available_bike_stands is:", available_bike_stands, "last update is:", last_update, "created date is:", created_date)
+    
+    #frontend=json.dumps(result)
+    return 'Check JSON DUMPS'
 
 def availability_recentUpdate(host,user,password,port,db):
     """Availability from SQL Alchemy Most recent Update limiting 109"""
@@ -316,6 +313,12 @@ def availability_recentUpdate(host,user,password,port,db):
     df = pd.read_sql_query(query, engine)
     print(df.iloc[:10])
     return df
+
+
+####--------------------------------------
+#05. Get Station and Availability Data
+####--------------------------------------
+
 
 def station_availability_df(host,user,password,port,db):
     """Retrieve the station table.
@@ -360,6 +363,11 @@ def station_availability_last_update_table_df(host,user,password,port,db):
     return df
 
 
+####--------------------------------------
+#06. Get Station and Availability And Weather Data
+####--------------------------------------
+
+
 def station_availability_weather_table_df(host,user,password,port,db):
     """Retrieve the station table.
     
@@ -378,7 +386,6 @@ def station_availability_weather_table_df(host,user,password,port,db):
     engine.dispose()
 
     return df
-
 
 def station_availability_weather_table_latest_df(host,user,password,port,db):
     """Retrieve the station table.
