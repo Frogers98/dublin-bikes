@@ -1,3 +1,13 @@
+##------------------APP---------------##
+## 
+##User:     Disappster
+##DC:       2021-03-01
+##DLM:      2021-03-01
+##MC:       COMP30830
+##SD:       Database and schema dictionaries for easy access
+##
+##------------------APP---------------##
+
 
 database_dictionary={
                         'username':'adamryan'

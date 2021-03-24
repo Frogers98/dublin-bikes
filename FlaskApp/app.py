@@ -4,10 +4,13 @@
 ##DC:       2021-03-01
 ##DLM:      2021-03-01
 ##MC:       COMP30830
-##SD:       FLASK APP
+##SD:       FLASK APP VIEWS AND RUN COMBINED
 ##
 ##------------------APP---------------##
 
+####--------------------------------------
+#00.Import Modules
+####--------------------------------------
 
 ######---------BEGIN
 #     FLASK
@@ -17,7 +20,18 @@ from flask import Flask, render_template
 from FlaskApp.methods import *
 from FlaskApp.data_dictionary import database_dictionary, fr_database_dictionary,js_database_dictioanry
 
+
+
+####--------------------------------------
+#01. DEFINE APP
+####--------------------------------------
+
 app = Flask(__name__)
+
+
+####--------------------------------------
+#02.DEFINE DATABASE CONNECTION
+####--------------------------------------
 
 myhost=database_dictionary['endpoint']
 myuser=database_dictionary['username']
@@ -37,16 +51,19 @@ mydb=database_dictionary['database']
 #myport=js_database_dictionary['port']
 #mydb=js_database_dictionary['database']
 
-######---------BEGIN
-#     BEGIN VIEWS
-######--------END
+
+####--------------------------------------
+#03.DEFINE VIEWS
+####--------------------------------------
 
 @app.route("/debug")
-def debug_hellow():
+def debug_hello():
+    """A debug page to check if the flask app is running"""
     return "Hello World"
 
 @app.route("/about")
 def about():
+    """An about page to show about stuff - maybe we can make this the main page?"""
     return render_template('about.html')
 
 @app.route("/")
@@ -79,7 +96,7 @@ def station():
 
 @app.route("/availability")
 def availability_request():
-    """Returns a limit of the availability data"""
+    """Returns a dataframe of the station and availability data"""
 
     result=station_availability_last_update_table_df(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
     

@@ -45,7 +45,6 @@ import sqlalchemy as sqla
 import pandas as pd
 import datetime as dt
 import numpy as np
-#import pyodbc
 import sys
 import os
 import json
