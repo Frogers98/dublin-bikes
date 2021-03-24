@@ -26,7 +26,7 @@ fr_database_dictionary={
                         ,'port':'3306'    
                     }
 
-js_database_dictioanry={
+js_database_dictionary={
                         'username':'janeslevin'
                         ,'password':'js2021dbbikes'
                         ,'database':'dbbikes30830'

@@ -41,7 +41,7 @@ function initMap() {
             map = new google.maps.Map(document.getElementById("map"), 
                 {
                     center: {lat: 53.349804, lng: -6.260310},
-                    zoom: 12,
+                    zoom: 13.5,
                     markersArray: [], // Array to hold all markers
                 });
 
@@ -50,6 +50,7 @@ function initMap() {
             data.forEach(
                 station => 
                     {
+                    var numAvailableBikes = String(station.available_bikes);
                     var cr_datetime=new Date(station.created_date).toLocaleString('en-ie');
                     console.log("Timestamp: ", cr_datetime);
 
@@ -82,6 +83,7 @@ function initMap() {
                         name: station.name,
                         number: station.number,
                         map: map,
+                        label: numAvailableBikes,
                         infowindow: station_info_window,
                         }
                     );
