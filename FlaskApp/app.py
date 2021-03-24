@@ -109,6 +109,14 @@ def recentUpdate():
     return avail_df.to_json(orient='records')
 
 
+from FlaskApp.tests import run_tests
+
 if __name__=="__main__":
     print('Running')
-    app.run(debug=True,port=5000)
+
+    test_result=False
+    test_result=run_tests(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
+
+    #Check if the python test cases run alright
+    if test_result:
+        app.run(debug=True,port=5000)

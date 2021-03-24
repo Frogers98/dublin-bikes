@@ -1,10 +1,11 @@
 ##------------------APP---------------##
 ## 
 ##User:     Disappster
-##DC:       2021-03-01
-##DLM:      2021-03-01
+##DC:       2021-03-24
+##DLM:      2021-03-24
 ##MC:       COMP30830
 ##SD:       SQL Statements
+##LD:       This section should hold all of the CODEBASE for SQL commands. SQL Commands should not exist in other app areas.
 ##
 ##------------------APP---------------##
 
