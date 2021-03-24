@@ -53,24 +53,41 @@ def about():
 @app.route("/home")
 @app.route("/index")
 def home():
-    station_Data = get_stations_json(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
-    print(station_Data)
-    stationData=json.loads(station_Data)
+    """Returns the Home Route"""
+    station_data = station_availability_last_update_table_df(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
+    
+    #Turn the dataframe into the json
+    station_data_json=station_data.to_json(orient="records")
+    
+    #Load the json into the front end
+    stationData=json.loads(station_data_json)
+
     return render_template('index.html', station_data=stationData)
 
 @app.route("/stations")
 def station():
-    station = get_stations_json(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
-    return station
+    """Returns the station Json Data"""
+
+    #Return the station info
+    station = station_availability_last_update_table_df(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
+    
+    #Turns that into a json
+    station_data_json=station.to_json(orient="records")
+
+    return station_data_json
 
 
 @app.route("/availability")
 def availability_request():
-    result=availability_limit_df(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
+    """Returns a limit of the availability data"""
+
+    result=station_availability_last_update_table_df(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
+    
     return result
 
 @app.route("/availability_v2")
 def recentUpdate():
+    """Recent Update"""
     avail_df=availability_recentUpdate(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
     return avail_df.to_json(orient='records')
 

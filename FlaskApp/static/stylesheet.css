@@ -1,20 +1,140 @@
-/* Always set the map height explicitly to define the size of the div
-       * element that contains the map. */
-       #map {
-        height: 90%;
-      }
-      #header {
-        height: 10%;
-      }
-      #stationSelector {
-        margin-left: auto;
-        margin-right: auto;
-      }
-      /* Optional: Makes the sample page fill the window. */
-      html,
-      body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
-      
+
+/*--------- General site styling -------------*/
+
+
+/* 
+-------------------
+TABLE OF CONTENTS
+-------------------
+
+-1. Header styling
+-2. Footer styling
+-3. Body styling
+-4. Link Styling
+-5. Container styling
+
+-999. HTML Style
+
+------------------
+END
+------------------
+
+Note: Use CTRL+F and the Number with a dot to navigate to that section.
+
+*/
+
+
+/*--------- 1. Header styling -------------*/
+
+#header {
+    position: static;
+    top:0;
+    height: 5%;
+    width: 100%;
+    padding-left:5px;
+    padding-right:5px;
+}
+
+#stationSelector {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+/*--------- 2. Footer styling -------------*/
+
+#footer-area {
+    position: static;
+    bottom:0;
+    height: 5%;
+    width: 100%;
+    padding-left:5px;
+    padding-right:5px;
+}
+
+
+/*--------- 3. Body styling -------------*/
+
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0
+  }
+
+
+#mainbody-area {
+    height: 85%;
+    width: 100%
+ }
+
+ #map {
+    height: 100%;
+    width: 100%
+ }
+
+
+/*--------- 4. Link styling -------------*/
+
+/* href Styling */
+a {
+    text-decoration: none;
+    color: #808080;
+}
+
+a:hover {
+    color: #02b8dd;
+    text-decoration: underline;
+}
+
+strong {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+
+a:link {
+    text-decoration: none;
+}
+
+a:visited {
+    text-decoration: underline;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+a:active {
+    text-decoration: underline;
+}
+
+
+
+/*--------- 5. Container styling -------------*/
+
+
+
+/*  https://www.w3schools.com/cssref/pr_class_clear.asp */
+.clear {
+    clear: both;
+}
+
+
+/*  Wrapper - Tutorial 3 Solution*/
+.wrapper {
+    margin: 0 auto;
+    padding-right: 5px;
+    padding-left: 5px;
+    max-width: 900px;
+    overflow: auto;
+}
+
+
+
+
+/*--------- 999. General styling for Google -------------*/
+
+html {
+    height: 100%;
+    margin: 0;
+    padding: 0
+  }
