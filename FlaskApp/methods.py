@@ -299,6 +299,7 @@ def availability_limit_df(host,user,password,port,db):
         print("number is:", number, "available bikes is:", available_bikes, "available_bike_stands is:", available_bike_stands, "last update is:", last_update, "created date is:", created_date)
     
     #frontend=json.dumps(result)
+    engine.dispose()
     return 'Check JSON DUMPS'
 
 def availability_recentUpdate(host,user,password,port,db):
@@ -318,6 +319,11 @@ def availability_recentUpdate(host,user,password,port,db):
     query = sqla.select([availability_data]).order_by(sqla.desc(availability_data.columns.created_date)).limit(109)
     df = pd.read_sql_query(query, engine)
     print(df.iloc[:10])
+    try:
+        engine.dispose()
+    except:
+        df=pd.DataFrame()
+
     return df
 
 
