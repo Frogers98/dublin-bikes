@@ -53,14 +53,15 @@ def about():
 @app.route("/home")
 @app.route("/index")
 def home():
-    #stationData = requestStationData()
-    return render_template('index.html')#, station_data=stationData)
+    station_Data = get_stations_json(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
+    print(station_Data)
+    stationData=json.loads(station_Data)
+    return render_template('index.html', station_data=stationData)
 
-@app.route("/station")
+@app.route("/stations")
 def station():
-    station_df=station_availability_last_update_table_df(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
-    station_json=station_df.to_json(orient='records')
-    return station_json
+    station = get_stations_json(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
+    return station
 
 
 @app.route("/availability")
@@ -71,7 +72,6 @@ def availability_request():
 @app.route("/availability_v2")
 def recentUpdate():
     avail_df=availability_recentUpdate(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
-
     return avail_df.to_json(orient='records')
 
 

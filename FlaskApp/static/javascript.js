@@ -19,90 +19,69 @@ Note: Use CTRL+F and the Number with a dot to navigate to that section.
 */
 
 let map;
-let openmarkers = [];
-let allmarkers = [];
 
-function initMap(){
-    fetch("/station")
-    .then(
-            response=>
-            {
-                return response.json();
-            }
-    ).then( 
-            data=>
-            {
-                console.log("data: ", data);
+function initMap() {
+    fetch("/stations").then(response => {
+        return response.json();
+    }).then(data => {
+        console.log("data:", data);
+        var test = getLatestUpdate();
+        console.log("DEBUG IS" + test)
+        map = new google.maps.Map(document.getElementById("map"), {
+            center: {lat: 53.349804, lng: -6.260310},
+            zoom: 12,
+            markersArray: [], // Array to hold all markers
+        });
+        data.forEach(station => {
+            const marker = new google.maps.Marker({
+                // Add the co-ordinates and name to each marker and specify which map it belongs to
+                position: {lat: station.position_lat, lng: station.position_long},
+                // Add the station name and number as attributes to the marker, this can be used as an identifier
+                name: station.name,
+                number: station.number,
+                map: map,
+            })
+            marker.addListener("click", () => {
+                const infowindow = new google.maps.InfoWindow({
+                    content: '<p>Station Name: ' + station.name + '</p>',
+                });
+                infowindow.open(map, marker);
+            });
+            map.markersArray.push(marker)
+        })
+    }).catch(err => {
+        console.log("Oops!", err);
+    })
 
-                /*This section is here because the silly CSS section wouldn't set the height until the map had been initialised */
-                var body = document.body;
-                var html = document.documentElement;
-                var height = (0.85)*(Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight));
+}
 
-                map=new google.maps.Map(document.getElementById("map"), {
-                            center: {lat: 53.349, lng: -6.260},
-                            zoom:14,
-                        }
-                );
+function getLatestUpdate() {
+    //Function to get the latest update from availability table
+    fetch("/availability").then(response => {
+        return response.json();
+    }).then(availabilityData =>{
+        return availabilityData;
+    })
+}
 
-                document.getElementById('map').style.height = height + 'px';
-                console.log(map);
-
-                data.forEach(
-                    station => 
-                    {
-                        console.log(station);
-                        var cr_datetime=new Date(station.created_date).toLocaleString('en-ie');
-                        console.log("Timestamp: ", cr_datetime)
-
-                        const station_info_window=new google.maps.InfoWindow(
-                            {
-                                content: "<h1 class='StationAvail'>" + station.name + "</h1>" 
-                                +"<table class='StationClass'>"
-                                    +"<tr class='StationClassRow'>"
-                                        +"<td class='StationClassDivider'>"
-                                            +"<div class='StationInfoWindowPopupName'>Available Bikes</div>: " + station.available_bikes
-                                        +"</td>"
-                                        +"<td class='StationClassDivider'>"
-                                            +"<div class='StationInfoWindowPopupName'>Available Stands</div>: " + station.available_bike_stands
-                                        +"</td>"
-                                    +"</tr>"
-                                    +"<tr class='StationClassRow'>"
-                                        +"<td class='StationClassDivider'>"
-                                            +"<div class='StationInfoWindowPopupName'>Last Updated</div>: " + cr_datetime
-                                        +"</td>"
-                                    +"</tr>"                                                   
-                                +"</table>",
-                            }
-                        );
-                        const marker=new google.maps.Marker(
-                            {
-                                position: { lat: station.position_lat, lng: station.position_long },
-                                map: map,
-                                infowindow: station_info_window,
-                            }
-                        );
-                        
-                        allmarkers.push(marker);
-
-                        marker.addListener("click",function() 
-                        {
-                            allmarkers.forEach(function(marker) {
-                                marker.infowindow.close(map, marker);
-                             });
-
-                             this.infowindow.open(map,marker);
-                        }
-                        );
-                    }
-                );
-
-            }
-        )
-    .catch(
-            err=>
-        {
-            console.log("Error: ",err);
+function filterMarkers(markerNumber) {
+    // Function to make all markers but the selected marker invisible
+    console.log("In filters marker function");
+    console.log("selected marker is: " + markerNumber);
+    // Loop through all the markers
+    for (let i = 0; i < map.markersArray.length; i++) {
+        let currentMarker = map.markersArray[i];
+        // Check if the show all stations option was selected first
+        if (markerNumber == "showAll") {
+            // Make all markers visible
+             currentMarker.setVisible(true)
         }
-    );
+        // Make all markers but the selected marker invisible
+        else if (markerNumber == currentMarker.number) {
+            console.log("Marker found!");
+            currentMarker.setVisible(true);
+        } else {
+            currentMarker.setVisible(false);
+        }
+    }
 }

@@ -54,6 +54,7 @@ import socket
 import traceback as tb
 import platform
 import json
+import pprint
 
 ######---------BEGIN
 #     DATA VIS
@@ -210,13 +211,35 @@ def availability_limit_df(host,user,password,port,db):
     engine_l=connect_db_engine(host,user,password,port,db)
     engine=engine_l[1]
     result = engine.execute(SQL_select_limit_availability)
+    
+
 
     print("type of sql request is", type(result))
 
     for number, available_bikes, available_bike_stands, last_update, created_date in result:
         print("number is:", number, "available bikes is:", available_bikes, "available_bike_stands is:", available_bike_stands, "last update is:", last_update, "created date is:", created_date)
     
-    return json.dumps(result)
+    #frontend=json.dumps(result)
+    return 'Check JSON DUMPS'
+
+
+
+
+def get_stations_json(host,user,password,port,db):
+    """Returns the stations table as a json string
+    The other functions can just call this instead of re-using the code in each function"""
+
+    engine_l=connect_db_engine(host,user,password,port,db)
+    engine=engine_l[1]
+
+    print("in get_stations_json()")
+    df = pd.read_sql_table("01_station", engine)
+    station_json = df.to_json(orient="records")
+    print("station data type:", type(station_json))
+    pp = pprint.PrettyPrinter(indent=4)
+    pp.pprint(station_json)
+    print()
+    return station_json
 
 
 
@@ -277,7 +300,7 @@ def availability_table_df(host,user,password,port,db):
 
 def availability_recentUpdate(host,user,password,port,db):
     """Availability from SQL Alchemy Most recent Update limiting 109"""
-    engine = createEngine()
+
     engine_l=connect_db_engine(host,user,password,port,db)
     engine=engine_l[1]
 
