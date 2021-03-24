@@ -1,0 +1,56 @@
+<!doctype html>
+
+<html lang="en">
+
+<!-- BEGIN: Header Area: Source my assignment 1 submission -->
+<head>
+
+    <!--SEO-->
+    <meta http-equiv="About" content="text/html; charset=utf-8">
+    <meta name="About" content="More Info of Dublin Bikes">
+    <meta name="keywords" content="Dublin Bikes, Availability, Google Map API, More Info, Author">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Disappster">
+
+    <!--Title-->
+    <title>Dublin Bike About Page</title>
+    
+    <!--CSS-->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheet.css') }}">
+    <link href='http://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
+
+    
+    <!--JS-->
+    <link type="text/javascript" href="{{ url_for('static', filename='javascript.js') }}">
+    <script src="{{ url_for('static', filename='javascript.js') }}" defer async></script>
+</head>
+<!-- END: Header Area -->
+
+
+
+<!--BEGIN: Body Area-->
+<body>
+
+<div id="header">
+
+      Choose a station:
+        <select name="stationSelector" id="stationSelector" onchange="filterMarkers(this.value)">
+            <option value="showAll">Show All Stations</option>
+            {% for station in station_data %}
+            <option value="{{ station.number }}">{{ station.name }}</option>
+            {% endfor %}
+      </select>
+</div>
+
+<div id="map"></div>
+</body>
+
+
+<script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC9btECtY48D3C-qx36Lt0gmUQK9XlYkM0&callback=initMap&libraries=&v=weekly"
+        async>
+
+</script>
+
+</html>
