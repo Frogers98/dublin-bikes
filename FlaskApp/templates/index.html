@@ -20,20 +20,12 @@
     <link href='http://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
 
-    
+
     <!--JS-->
     <link type="text/javascript" href="{{ url_for('static', filename='javascript.js') }}">
-    <script src="{{ url_for('static', filename='javascript.js') }}" defer async></script>
+    <script src="{{ url_for('static', filename='javascript.js') }}"></script>
 
-     <script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC9btECtY48D3C-qx36Lt0gmUQK9XlYkM0&callback=initMap&libraries=&v=weekly"
-          async>
-      // AR_API:
-      // https://maps.googleapis.com/maps/api/js?key=AIzaSyC9btECtY48D3C-qx36Lt0gmUQK9XlYkM0&callback=initMap&libraries=&v=weekly
-      // JS_API:
-      // https://maps.googleapis.com/maps/api/js?key=AIzaSyDbU4W2J29Zz3Jz8gkcgImNj4YRwgLZCoQ&callback=initMap&libraries=&v=weekly
 
-  </script>
 </head>
 <!-- END: Head Area -->
 
@@ -101,7 +93,14 @@
 
 
   <!--BEGIN: GOOGLE ASYNC at END OF DOM ELEMENTS IN BODY-->
-
+     <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC9btECtY48D3C-qx36Lt0gmUQK9XlYkM0&callback=initMap&libraries=&v=weekly"
+          async>
+      // AR_API:
+      // https://maps.googleapis.com/maps/api/js?key=AIzaSyC9btECtY48D3C-qx36Lt0gmUQK9XlYkM0&callback=initMap&libraries=&v=weekly
+      // JS_API:
+      // https://maps.googleapis.com/maps/api/js?key=AIzaSyDbU4W2J29Zz3Jz8gkcgImNj4YRwgLZCoQ&callback=initMap&libraries=&v=weekly
+  </script>
    <!--END: GOOGLE ASYNC at END OF DOM ELEMENTS IN BODY-->
   
 </body>
