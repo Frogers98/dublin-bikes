@@ -64,6 +64,10 @@ def debug_hello():
 @app.route("/about")
 def about():
     """An about page to show about stuff - maybe we can make this the main page?"""
+
+    graph_df=stations_by_day(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
+    print(graph_df)
+    
     return render_template('about.html')
 
 @app.route("/")

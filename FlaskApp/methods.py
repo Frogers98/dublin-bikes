@@ -415,3 +415,36 @@ def station_availability_weather_table_latest_df(host,user,password,port,db):
     engine.dispose()
 
     return df
+
+def stations_by_day(host,user,password,port,db):
+    """A dataframe to groupby columns given"""
+
+    summary_df=pd.DataFrame()
+
+    try:
+        engine_l=connect_db_engine(host,user,password,port,db)
+        engine=engine_l[1]
+        df=pd.DataFrame()
+
+        required_column=['number','name','created_date']
+        group_column=['number','name','created_date_weekday']
+        agg_columns={'available_bikes': np.mean}
+
+
+        df=pd.read_sql(SQL_select_station_avail_weather,engine)
+        df['created_date']=pd.to_datetime(df['created_date'])
+
+        df['created_date_weekday']=df['created_date'].dt.dayofweek
+
+        summary_df=(df
+                    .groupby(group_column)
+                    .agg(agg_columns)
+                    .reset_index()
+                    )
+
+        engine.dispose()
+
+    except Exception as e:
+        print(e)
+
+    return summary_df
