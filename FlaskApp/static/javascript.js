@@ -50,7 +50,7 @@ function initMap() {
             data.forEach(
                 station => 
                     {
-                    var numAvailableBikes = String(station.available_bikes);
+                    //var numAvailableBikes = String(station.available_bikes);
                     var cr_datetime=new Date(station.created_date).toLocaleString('en-ie');
                     console.log("Timestamp: ", cr_datetime);
 
@@ -82,8 +82,12 @@ function initMap() {
                         // Add the station name and number as attributes to the marker, this can be used as an identifier
                         name: station.name,
                         number: station.number,
+                        // Also add the available bikes and stands
+                        available_bikes: station.available_bikes,
+                        available_stands: station.available_bike_stands,
+                        icon: determineAvailabilityPercent(station.available_bikes, station.available_bike_stands),
                         map: map,
-                        label: numAvailableBikes,
+                        //label: numAvailableBikes,
                         infowindow: station_info_window,
                         }
                     );
@@ -142,4 +146,22 @@ function filterMarkers(markerNumber) {
                 currentMarker.setVisible(false);
             }
     }
+}
+
+function determineAvailabilityPercent(available_bikes, available_stands) {
+  // Function to return a marker colour depending on the amount of available bikes remaining
+    let totalStations = available_bikes + available_stands;
+    let percentRemaining = (available_bikes / totalStations) * 100;
+    // We will change the colour depending on the percentage and then return it
+    let colour;
+    if (percentRemaining == 0) {
+        colour = "http://maps.google.com/mapfiles/ms/icons/red-dot.png";
+    }
+    else if (percentRemaining <= 25) {
+        colour = "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png";
+    }
+    else if (percentRemaining > 25) {
+        colour = "http://maps.google.com/mapfiles/ms/icons/green-dot.png";
+    }
+    return colour;
 }
