@@ -33,11 +33,11 @@ app = Flask(__name__)
 #02.DEFINE DATABASE CONNECTION
 ####--------------------------------------
 
-# myhost=database_dictionary['endpoint']
-# myuser=database_dictionary['username']
-# mypassword=database_dictionary['password']
-# myport=database_dictionary['port']
-# mydb=database_dictionary['database']
+myhost=database_dictionary['endpoint']
+myuser=database_dictionary['username']
+mypassword=database_dictionary['password']
+myport=database_dictionary['port']
+mydb=database_dictionary['database']
 
 # myhost=fr_database_dictionary['endpoint']
 # myuser=fr_database_dictionary['username']

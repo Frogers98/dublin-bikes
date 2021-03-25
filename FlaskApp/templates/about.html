@@ -1,8 +1,8 @@
 <!doctype html>
 
 <html lang="en">
-    
-<!-- BEGIN: Header Area: Source my assignment 1 submission -->
+
+<!-- BEGIN: Head Area: -->
 <head>
 
     <!--SEO-->
@@ -14,42 +14,58 @@
 
     <!--Title-->
     <title>Dublin Bike About Page</title>
-    
+  
+  
     <!--CSS-->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheet.css') }}">
     <link href='http://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
 
 </head>
-<!-- END: Header Area -->
+<!-- END: Head Area -->
+
 
 
 <!--BEGIN: Body Area-->
 <body>
 
-    <!-- BEGIN: Header -->
-    <header id="header-area">
-        
-      <h1>Test</h1>
+    <!--BEGIN: Header DIV Area-->
+    <header id="header">
+
+      <!--BEGIN: Title Area-->
+      <div class="wrapper">
+      <!--END: Title Area-->
+
+      <!--BEGIN: Links Area-->
+
+          <nav id="navbarheader">
+            <a class="HeaderLink" href="/index">Stations</a>
+            <a class="HeaderLink" href="/about">About Disappster</a>
+          </nav>
+
+      <!--END: Links Area-->
+
 
     </header>
-    <!-- END: Header -->
+    <!--END: Header DIV Area-->
 
-    <!--BEGIN: About Area-->
+   <!--BEGIN: BODY Area-->
     <div id="mainbody-area">
-        <div id="AboutArea">
-            <p>About Me</p>
-        </div>
     </div>
-    <!--END:Map-->
+    <!--END:BODY AREA-->
 
+    <!--BEGIN: Footer Area-->
     <footer id="footer-area">
 
-      <h1>Test</h1>
+      <p class='footer-font'>Created by <a class='footer-link' href='https://disappster.atlassian.net/wiki/spaces/COMP30830/pages/164009/Team+Member+Contact+List'>Disappster</a> - COMP30830</p>
 
     </footer>
+    <!--END: Footer Area-->
 
+
+  <!--BEGIN: GOOGLE ASYNC at END OF DOM ELEMENTS IN BODY-->
+   <!--END: GOOGLE ASYNC at END OF DOM ELEMENTS IN BODY-->
+  
 </body>
-<!--END: Body Area-->
 
 </html>

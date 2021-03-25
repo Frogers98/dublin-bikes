@@ -33,32 +33,58 @@
 <body>
 
     <!--BEGIN: Header DIV Area-->
-    <header id="header">
-          Choose a station:
+      <header id="header">
+
+      <!--BEGIN: Title Area-->
+      <div class="wrapper">
+      <!--END: Title Area-->
+
+      <!--BEGIN: Links Area-->
+
+          <nav id="navbarheader">
+            <a class="HeaderLink" href="/index">Stations</a>
+            <a class="HeaderLink" href="/about">About Disappster</a>
+          </nav>
+
+      <!--END: Links Area-->
+      <div id="headFilterArea">
+            <label>Choose a station:</label>
             <select name="stationSelector" id="stationSelector" onchange="filterMarkers(this.value)">
                 <option value="showAll">Show All Stations</option>
                 {% for station in station_data %}
                 <option value="{{ station.number }}">{{ station.name }}</option>
                 {% endfor %}
           </select>
+      </div>
+    </div>
+
+
     </header>
     <!--END: Header DIV Area-->
 
-
     <!--BEGIN: BODY Area-->
     <div id="mainbody-area">
-        <div id="map"></div>
-    </div>
-    <!--END:BODY AREA-->
+
+      
+        <div id="map">
+              <!--MapGoesHere-->
+        </div>
+      
 
     <!--BEGIN: SIDE PANEL Area-->
 
     <!--END:SIDE PANEL AREA-->
 
+    </div>
+    <!--END:BODY AREA-->
+
+
+
     <!--BEGIN: Footer Area-->
     <footer id="footer-area">
 
-      <h1>Test</h1>
+      <p class='footer-font'>Created by <a class='footer-link' href='https://disappster.atlassian.net/wiki/spaces/COMP30830/pages/164009/Team+Member+Contact+List'>Disappster</a> - COMP30830</p>
+      <div class="clear"></div>
 
     </footer>
     <!--END: Footer Area-->
@@ -66,7 +92,7 @@
 
   <!--BEGIN: GOOGLE ASYNC at END OF DOM ELEMENTS IN BODY-->
   <script
-          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC9btECtY48D3C-qx36Lt0gmUQK9XlYkM0&callback=initMap&libraries=&v=weekly"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC9btECtY48D3C-qx36Lt0gmUQK9XlYkM0&callback=initMap&libraries=&v=weekly"
           async>
       // AR_API:
       // https://maps.googleapis.com/maps/api/js?key=AIzaSyC9btECtY48D3C-qx36Lt0gmUQK9XlYkM0&callback=initMap&libraries=&v=weekly

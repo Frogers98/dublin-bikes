@@ -105,8 +105,6 @@ def connect_db_engine(host,user,password,port,db):
         engine=sqla.create_engine(connect_statement,echo=True)
 
     finally:
-        print(connect_statement)
-        engine=sqla.create_engine(connect_statement,echo=True)
         error_code=1
         error_message=error_dictionary[error_code]
         print(error_message)
