@@ -82,7 +82,8 @@ def home():
     
     #Load the json into the front end
     stationData=json.loads(station_data_json)
-
+    # This sorts the list station dictionaries by name so the selector will be ordered alphabetically
+    stationData = sorted(stationData, key=lambda i: i['name'])
     return render_template('index.html', station_data=stationData)
 
 @app.route("/stations")
