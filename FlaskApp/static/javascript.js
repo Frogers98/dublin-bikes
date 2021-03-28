@@ -197,3 +197,12 @@ function filterColours(markerColour) {
     }
 
 }
+
+function showChartHolder(stationNumber) {
+    if (stationNumber != "showAll")
+    {
+        document.getElementById('chartHolder').style.display = "block";
+    } else {
+        document.getElementById('chartHolder').style.display = "none";
+    }
+}

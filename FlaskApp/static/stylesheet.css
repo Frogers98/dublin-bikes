@@ -27,36 +27,34 @@ Note: Use CTRL+F and the Number with a dot to navigate to that section.
 /*--------- 1. Header styling -------------*/
 
 #header {
-    position: static;
-    width: 100%;
+    position: relative;
+    /*width: 100%;*/
+    max-width: 100vw;
     top:0;
-    height: 5%;
+    height: 10%;
     padding-left:5px;
     padding-right:5px;
     font-weight: bold;
     color: #F9F9F6;
     background-color: #444;
+    z-index: 1;
 }
-  
 
 #header a {
     font-family: 'Quicksand', sans-serif;
     float: left;
     color: #F9F9F6;
     text-align: center;
-    padding-top: 1%;
-    padding-bottom: 1%;
-    padding-left: 2%;
-    padding-right: 2%;
-    text-decoration: bold;
-    font-size: 10px
+    padding: 1% 2% 1% 2%;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 15px;
   }
-
 
   /* Change the color of links on hover */
   #header a:hover {
     background-color: #F9F9F6;
-    color: #444
+    color: #444;
   }
   
   /* Add a color to the active/current link */
@@ -65,32 +63,35 @@ Note: Use CTRL+F and the Number with a dot to navigate to that section.
     color: white
   }
 
-#stationSelector {
-    margin-left: auto;
-    margin-right: auto;
-  }
+/*#stationSelector {*/
+/*    margin-left: auto;*/
+/*    margin-right: auto;*/
+/*  }*/
 
   /* Change the color of links on hover */
-  #Blockselector {
+#Blockselector {
     float: right
   }
 
-
-  #headFilterArea {
-    float: right;
-    display: inline;
+#ColoursRadio {
     font-family: 'Quicksand', sans-serif;
-    padding-top: 1%;
-    padding-bottom: 1%;
-    padding-left: 2%;
-    padding-right: 2%;
-    text-decoration: none;
+    position: absolute;
+    right: 4%;
+    bottom: 10%;
+    font-size: 15px;
+    /*padding: 1% 4% 4% 1%;*/
 }
+
+#ColoursRadio label {
+    /*padding-right: 2%;*/
+}
+
 /*--------- 2. Footer styling -------------*/
 
 #footer-area {
-    position: static;
-    width: 100%;
+    position: relative;
+    /*width: 100%;*/
+    max-width: 100vw;
     top:0;
     height: 5%;
     padding-left:5px;
@@ -110,48 +111,107 @@ Note: Use CTRL+F and the Number with a dot to navigate to that section.
     width: auto;
 }
 
-
 .footer-link {
     font-family: 'Monserrat', sans-serif;
     color: #F9F9F6;
     background-color: #444;
-    padding-top: 1%;
-    padding-bottom: 1%;
-    padding-left: 2%;
-    padding-right: 2%;
+    padding: 1% 2% 1% 2%;
 }
 
 /*--------- 3. Body styling -------------*/
 
 body {
+    /*max-height: 100vw;*/
     height: 100%;
     margin: 0;
     padding: 0;
   }
 
-
 #mainbody-area {
+    position: relative;
     height: 90%;
-    width: 100%;
+    /*width: 100%;*/
+    max-width: 100vw;
     padding-right: 5px;
     padding-left: 5px
  }
 
 
-#map-area {
-    height: 100%;
-    width: 100%;
-    padding-right: 5px;
-    padding-left: 5px
- }
+/*#map-area {*/
+/*    height: 100%;*/
+/*    width: 100%;*/
+/*    padding-right: 5px;*/
+/*    padding-left: 5px*/
+/* }*/
 
 #map {
+    position: absolute;
+    top: 0;
+    right: 0;
     height: 100%;
-    width: 100%
+    width: 70%;
+    /*height: 100%;*/
+    /*width: 100%*/
  }
 
+/*-------- 5. Side Panel styling  -------*/
 
-/*--------- 4. Link styling -------------*/
+#side-panel {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 30%;
+    background-color: #f5f5f5;
+}
+
+  #headFilterArea {
+      position: absolute;
+      float: right;
+      /*display: inline;*/
+      font-family: 'Quicksand', sans-serif;
+      padding: 3% 2% 3% 4%;
+      text-decoration: none;
+}
+
+  #chartHolder {
+      position: relative;
+      height: 85%;
+      width: 90%;
+      align-self: center;
+      background-color: #f5f5f5;
+      display: none;
+  }
+
+    #chart1 {
+        position: absolute;
+        top: 0;
+        height:33%;
+        width: 100%;
+        background-color: #ffffff;
+  }
+
+    #chart2 {
+        position: absolute;
+        width: 100%;
+        height: 33%;
+        background-color: #ffffff;
+        top: 50%;
+        transform: translateY(-50%);
+  }
+
+    #chart3 {
+        position: absolute;
+        bottom: 0;
+        height: 33%;
+        width: 100%;
+        background-color: #ffffff;
+  }
+
+
+/*--------- 5. Link styling -------------*/
 
 /* href Styling */
 a {
@@ -187,7 +247,7 @@ a:active {
 }
 
 
-/*--------- 5. Container styling -------------*/
+/*--------- 6. Container styling -------------*/
 
 
 

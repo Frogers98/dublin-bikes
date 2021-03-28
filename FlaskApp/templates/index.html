@@ -51,7 +51,7 @@
                       <input type="radio" name="colourFilter"
                              value="allColours"
                              id="allRadio"
-                             onchange="filterColours(this.value)">All colours</label>
+                             onchange="filterColours(this.value)" checked>All colours</label>
                   <label for="greenMarkers">
                       <input type="radio" name="colourFilter"
                              value="http://maps.google.com/mapfiles/ms/icons/green-dot.png"
@@ -70,15 +70,6 @@
           </nav>
 
       <!--END: Links Area-->
-      <div id="headFilterArea">
-            <label>Choose a station:</label>
-            <select name="stationSelector" id="stationSelector" onchange="filterMarkers(this.value)">
-                <option value="showAll">Show All Stations</option>
-                {% for station in station_data %}
-                <option value="{{ station.number }}">{{ station.name }}</option>
-                {% endfor %}
-          </select>
-      </div>
     </div>
 
 
@@ -96,6 +87,22 @@
 
     <!--BEGIN: SIDE PANEL Area-->
 
+        <div id="side-panel">
+                  <div id="headFilterArea">
+                      <label>Choose a station:</label>
+                      <select name="stationSelector" id="stationSelector" onchange="filterMarkers(this.value); showChartHolder(this.value)">
+                          <option value="showAll">Show All Stations</option>
+                          {% for station in station_data %}
+                          <option value="{{ station.number }}">{{ station.name }}</option>
+                          {% endfor %}
+                      </select>
+                  </div>
+            <div id="chartHolder">
+                <div id="chart1">Display Chart 1</div>
+                <div id="chart2">Display Chart 2</div>
+                <div id="chart3">Display Chart 3</div>
+            </div>
+        </div>
     <!--END:SIDE PANEL AREA-->
 
     </div>
@@ -115,7 +122,7 @@
 
   <!--BEGIN: GOOGLE ASYNC at END OF DOM ELEMENTS IN BODY-->
      <script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC9btECtY48D3C-qx36Lt0gmUQK9XlYkM0&callback=initMap&libraries=&v=weekly"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDbU4W2J29Zz3Jz8gkcgImNj4YRwgLZCoQ&callback=initMap&libraries=&v=weekly"
           async>
       // AR_API:
       // https://maps.googleapis.com/maps/api/js?key=AIzaSyC9btECtY48D3C-qx36Lt0gmUQK9XlYkM0&callback=initMap&libraries=&v=weekly
