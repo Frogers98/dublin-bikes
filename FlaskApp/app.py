@@ -45,11 +45,11 @@ app = Flask(__name__)
 # myport=fr_database_dictionary['port']
 # mydb=fr_database_dictionary['database']
 
-myhost=js_database_dictionary['endpoint']
-myuser=js_database_dictionary['username']
-mypassword=js_database_dictionary['password']
-myport=js_database_dictionary['port']
-mydb=js_database_dictionary['database']
+# myhost=js_database_dictionary['endpoint']
+# myuser=js_database_dictionary['username']
+# mypassword=js_database_dictionary['password']
+# myport=js_database_dictionary['port']
+# mydb=js_database_dictionary['database']
 
 
 ####--------------------------------------

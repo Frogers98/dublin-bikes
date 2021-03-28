@@ -101,6 +101,7 @@ function initMap() {
                          });
 
                          this.infowindow.open(map,marker);
+                         showChartHolder(this.number);
                     });
                     
                     
