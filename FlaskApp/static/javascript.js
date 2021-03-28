@@ -165,3 +165,35 @@ function determineAvailabilityPercent(available_bikes, available_stands) {
     }
     return colour;
 }
+
+function filterColours(markerColour) {
+    // function to filter markers based on selected colour in radio buttons
+
+    // First we can check if all colours was selected and just make all markers visible
+    if (markerColour == "allColours") {
+        for (let i = 0; i < map.markersArray.length; i++) {
+            let currentMarker = map.markersArray[i];
+            currentMarker.setVisible(true);
+        }
+    }
+    else {
+        // make an array to store all the markers of this colour
+        let colouredMarkers = [];
+        for (let i = 0; i < map.markersArray.length; i++) {
+            let currentMarker = map.markersArray[i];
+            if (markerColour == currentMarker.icon) {
+                // Append all markers with the specified colour to the array
+                colouredMarkers.push(currentMarker);
+            }
+            // First make all markers invisible as we're looping through
+            currentMarker.infowindow.close(map, currentMarker);
+            currentMarker.setVisible(false);
+        }
+        // Now we can make all the markers of the colour selected visible
+        for (let i = 0; i < colouredMarkers.length; i++) {
+            let currentMarker = colouredMarkers[i];
+            currentMarker.setVisible(true);
+        }
+    }
+
+}
