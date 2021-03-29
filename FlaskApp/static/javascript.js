@@ -102,9 +102,8 @@ function initMap() {
 
                          this.infowindow.open(map,marker);
                          showChartHolder(this.number);
+
                     });
-                    
-                    
 
                 });
                 
@@ -131,7 +130,8 @@ function filterMarkers(markerNumber) {
         if (markerNumber == "showAll") 
             {
                 // Make all markers visible
-                currentMarker.setVisible(true)
+                currentMarker.setVisible(true);
+                currentMarker.infowindow.close(map, currentMarker);
             }
 
         // Make all markers but the selected marker invisible
@@ -139,6 +139,7 @@ function filterMarkers(markerNumber) {
             {
                 console.log("Marker found!");
                 currentMarker.setVisible(true);
+                google.maps.event.trigger(currentMarker, 'click');
             } 
         
         else 
@@ -207,3 +208,7 @@ function showChartHolder(stationNumber) {
         document.getElementById('chartHolder').style.display = "none";
     }
 }
+
+// function myClick(stationNumber){
+//     google.maps.event.trigger(markersArray[stationNumber], 'click');
+// }
