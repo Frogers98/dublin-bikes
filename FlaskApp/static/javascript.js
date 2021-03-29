@@ -75,6 +75,10 @@ function initMap() {
                         }
                     );
 
+                    google.maps.event.addListener(map, 'click', function() {
+                        station_info_window.close();
+                    });
+
                     const marker = new google.maps.Marker(
                         {
                         // Add the co-ordinates and name to each marker and specify which map it belongs to
@@ -104,7 +108,6 @@ function initMap() {
                          showChartHolder(this.number);
 
                     });
-
                 });
                 
         }).catch(
