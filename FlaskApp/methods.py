@@ -70,6 +70,10 @@ from FlaskApp.data_dictionary import database_dictionary
 from FlaskApp.data_dictionary import database_schema
 from FlaskApp.sql import *
 
+
+
+
+
 ####--------------------------------------
 #01. Connect to a Database Engine
 ####--------------------------------------
@@ -92,23 +96,18 @@ def connect_db_engine(host,user,password,port,db):
     engine=''
     
     error_dictionary={0:'No Error'
-                     ,1:'One of the parammeters is wrong'}
+                     ,1:'One of the parameters is wrong'
+                      ,999: 'Uncaught exception'
+                     }
     
     try:
-        connect_statement='mysql+mysqldb://{}:{}@{}:{}/{}'.format(user,password,host,port,db)
-        print(connect_statement)
-        engine=sqla.create_engine(connect_statement,echo=True)
-        
-    except:
         connect_statement='mysql+mysqlconnector://{}:{}@{}:{}/{}'.format(user,password,host,port,db)
         print(connect_statement)
         engine=sqla.create_engine(connect_statement,echo=True)
-
-    finally:
-        error_code=1
-        error_message=error_dictionary[error_code]
-        print(error_message)
         
+    except Exception as e:
+        error_code=999
+        print(e)
     
     return [error_code,engine]
 
@@ -377,25 +376,71 @@ def station_availability_last_update_table_df(host,user,password,port,db):
 #06. Get Station and Availability And Weather Data
 ####--------------------------------------
 
-
 def station_availability_weather_table_df(host,user,password,port,db):
-    """Retrieve the station table.
+    """This function pulls the station, weather, availability data.
     
-    Return table as dataframe
-    """
+    Note: This is very time intensive. Use this to pass to other summary functions"""
     
-    print("Inside setup_database()\n\n")
+    print("Inside pull_station_weather_availability_data(host,user,password,port,db)")
     
-    engine_l=connect_db_engine(host,user,password,port,db)
-    engine=engine_l[1]
-    df=pd.DataFrame()
+    #Possible Errors
+    error_dictionary={0:'No Error'
+                     ,1:'The database failed to connect'
+                     ,2:"The query is not a valid string"
+                     ,3: "The returned database is empty"
+                      ,999: 'Uncaught exception'
+                     }
+    
+    #Set up a default value to return
+    data_df=pd.DataFrame()
+    
+    error_code=0
+    
+    #Configure the SQL statement
+    sql_statement=SQL_select_station_avail_weather
+    
+    time_statement="The retrieval from the database took: {} (ns)"
+    
+    #Begin try
+    try:
+        engine_l=connect_db_engine(host,user,password,port,db)
+        engine=engine_l[1]
+        
+        #No error connecting to engine
+        if engine_l[0]==0:
+            
+            #String
+            if type(sql_statement)==str and len(sql_statement)>0:
+                
+                #Begin counter
+                start_time=time.perf_counter_ns()
+                data_df=pd.read_sql(sql_statement,engine)
+                end_time=time.perf_counter_ns()
+                engine.dispose()
+                
+                #Performance measurement
+                print(time_statement.format(end_time-start_time))
+                
+                #Dataframe is empty
+                if len(data_df)==0:
+                    error_code=3
+                    error_message=error_dictionary[error_code]
+                    
+            #Invalid SQL Statement
+            else:
+                error_code=2
+                error_message=error_dictionary[error_code]         
+        
+        else:
+            error_code=1
+            error_message=error_dictionary[error_code]
 
-    #no error
-    df=pd.read_sql(SQL_select_station_avail_weather,engine)
+    except Exception as e:
+        error_code=999
+        print("Unexpected failure: {}".format(e))
+        
+    return data_df
 
-    engine.dispose()
-
-    return df
 
 def station_availability_weather_table_latest_df(host,user,password,port,db):
     """Retrieve the station table.
@@ -416,35 +461,912 @@ def station_availability_weather_table_latest_df(host,user,password,port,db):
 
     return df
 
-def stations_by_day(host,user,password,port,db):
-    """A dataframe to groupby columns given"""
+def availability_table_for_station_df(host,user,password,port,db,station_no):
+    """Retrieve the station table.
+    
+    Return table as dataframe
+    """
+    
+    print("Inside setup_database()\n\n")
+    
+    engine_l=connect_db_engine(host,user,password,port,db)
+    engine=engine_l[1]
+    df=pd.DataFrame()
 
-    summary_df=pd.DataFrame()
-
+    #no error
     try:
-        engine_l=connect_db_engine(host,user,password,port,db)
-        engine=engine_l[1]
-        df=pd.DataFrame()
-
-        required_column=['number','name','created_date']
-        group_column=['number','name','created_date_weekday']
-        agg_columns={'available_bikes': np.mean}
-
-
-        df=pd.read_sql(SQL_select_station_avail_weather,engine)
-        df['created_date']=pd.to_datetime(df['created_date'])
-
-        df['created_date_weekday']=df['created_date'].dt.dayofweek
-
-        summary_df=(df
-                    .groupby(group_column)
-                    .agg(agg_columns)
-                    .reset_index()
-                    )
-
-        engine.dispose()
-
+        df=pd.read_sql(SQL_select_availability_where_number.format(station_no),engine)
+    
     except Exception as e:
         print(e)
 
-    return summary_df
+    engine.dispose()
+
+    return df
+
+
+
+####--------------------------------------
+#07. Analytics function
+####--------------------------------------
+
+
+
+#-###-------------------------------------
+#07.01 Functions for grouping by and aggregating
+#-###-------------------------------------
+
+def group_by_column(df,groupby_columns,agg_dict):
+    """A function to group by columns given and aggregate according to a dictionary.
+    
+    Input: df, columns to group by, agg_dictionary
+    """
+    
+    print("inside group_by_column(df,{},{})".format(groupby_columns,agg_dictionary))
+    
+    #Possible Errors
+    error_dictionary={0:'No Error'
+                     ,1:'The dataframe is empty'
+                     ,2:"The columns to group by is empty or not a list"
+                     ,3: 'The dictionary is empty'
+                     ,4: 'The dataframe does not contain the required columns'
+                      ,999: 'Uncaught exception'
+                     }
+    
+    #Set as empty
+    summary_df=pd.DataFrame()
+    required_columns=[]
+    
+    error_code=0
+    
+    try:
+
+        #Dictionary is non-empty
+        if len(agg_dict)>0 and type(agg_dict)==dict:
+
+            #df not empty
+            if len(df)>0:
+
+                #List and non-empty
+                if type(groupby_columns)==list and len(groupby_columns)>0:
+                    required_columns=list(df.columns)+list(agg_dict.keys())
+
+                    #Required columns found
+                    if set(required_columns).issubset(set(df.columns)):
+
+                        #begin groupby - note: not catching summary issues as they are plentiful
+                        summary_df=(df
+                                        .groupby(groupby_columns)
+                                        .agg(agg_dict)
+                                        .reset_index()
+                                    )
+
+
+                    #Required columns not found    
+                    else:
+                        error_code=4
+                        error_message=error_dictionary[error_code]
+                        print(error_message)
+
+                #Not a list or empty
+                else:
+                    error_code=2
+                    error_message=error_dictionary[error_code]
+                    print(error_message)
+
+            #df is not empty
+            else:
+                error_code=1
+                error_message=error_dictionary[error_code]
+                print(error_message)
+
+        #empty Dictionary
+        else:
+            error_code=3
+            error_message=error_dictionary[error_code]
+            print(error_message)
+            
+    except Exception as e:
+        error_code=999
+        print("Uncaught exception: {}".format(e))
+        
+    return [error_code,summary_df]
+    
+
+#-###-------------------------------------
+#07.02 Functions for adding columns to dataframe
+#-###-------------------------------------
+
+def add_datestamp_to_dataframe(df,column_name):
+    """Add datestamp of a column to a dataframe"""
+    
+    #Possible Errors
+    error_dictionary={0:'No Error'
+                     ,1:'The dataframe is empty'
+                     ,2: 'The dataframe does not contain the required columns'
+                      ,999: 'Uncaught exception'
+                     }
+    
+    time_period_name='date'
+    new_column_name='{}_{}'
+    
+    try:
+    
+        #dataframe not empty
+        if len(df)>0:
+
+            #column in df
+            if column_name in df.columns:
+                new_column_name=new_column_name.format(column_name,time_period_name)
+                df[column_name]=pd.to_datetime(df[column_name])
+                df[new_column_name]=df[column_name].dt.date
+
+            #Column not in df
+            else:
+                error_code=2
+                error_message=error_dictionary[error_code]
+                print(error_message)
+
+        #df empty
+        else:
+            error_code=1
+            error_message=error_dictionary[error_code]
+            print(error_message)
+            
+    except Exception as e:
+        error_code=999
+        error_message=error_dictionary[error_code]
+        
+    return df
+    
+    
+def add_weekday_no_to_dataframe(df,column_name):
+    """Add weekdayno of a column to a dataframe"""
+    
+    #Possible Errors
+    error_dictionary={0:'No Error'
+                     ,1:'The dataframe is empty'
+                     ,2: 'The dataframe does not contain the required columns'
+                      ,999: 'Uncaught exception'
+                     }
+    
+    time_period_name='dayno'
+    new_column_name='{}_{}'
+    
+    try:
+    
+        #dataframe not empty
+        if len(df)>0:
+
+            #column in df
+            if column_name in df.columns:
+                new_column_name=new_column_name.format(column_name,time_period_name)
+                df[column_name]=pd.to_datetime(df[column_name])
+                df[new_column_name]=df[column_name].dt.dayofweek
+
+            #Column not in df
+            else:
+                error_code=2
+                error_message=error_dictionary[error_code]
+                print(error_message)
+
+        #df empty
+        else:
+            error_code=1
+            error_message=error_dictionary[error_code]
+            print(error_message)
+            
+    except Exception as e:
+        error_code=999
+        error_message=error_dictionary[error_code]
+        
+    return df
+    
+def add_week_no_to_dataframe(df,column_name):
+    """Add week no of a column to a dataframe"""
+    
+    #Possible Errors
+    error_dictionary={0:'No Error'
+                     ,1:'The dataframe is empty'
+                     ,2: 'The dataframe does not contain the required columns'
+                      ,999: 'Uncaught exception'
+                     }
+    
+    time_period_name='weekno'
+    new_column_name='{}_{}'
+    
+    try:
+    
+        #dataframe not empty
+        if len(df)>0:
+
+            #column in df
+            if column_name in df.columns:
+                new_column_name=new_column_name.format(column_name,time_period_name)
+                df[column_name]=pd.to_datetime(df[column_name])
+                df[new_column_name]=df[column_name].dt.week
+
+            #Column not in df
+            else:
+                error_code=2
+                error_message=error_dictionary[error_code]
+                print(error_message)
+
+        #df empty
+        else:
+            error_code=1
+            error_message=error_dictionary[error_code]
+            print(error_message)
+            
+    except Exception as e:
+        error_code=999
+        error_message=error_dictionary[error_code]
+        
+    
+    return df
+      
+def add_month_no_to_dataframe(df,column_name):
+    """Add month of a column to a dataframe"""
+    
+    #Possible Errors
+    error_dictionary={0:'No Error'
+                     ,1:'The dataframe is empty'
+                     ,2: 'The dataframe does not contain the required columns'
+                      ,999: 'Uncaught exception'
+                     }
+    
+    time_period_name='monthno'
+    new_column_name='{}_{}'
+    
+    try:
+    
+        #dataframe not empty
+        if len(df)>0:
+
+            #column in df
+            if column_name in df.columns:
+                new_column_name=new_column_name.format(column_name,time_period_name)
+                df[column_name]=pd.to_datetime(df[column_name])
+                df[new_column_name]=df[column_name].dt.month
+
+            #Column not in df
+            else:
+                error_code=2
+                error_message=error_dictionary[error_code]
+                print(error_message)
+
+        #df empty
+        else:
+            error_code=1
+            error_message=error_dictionary[error_code]
+            print(error_message)
+            
+    except Exception as e:
+        error_code=999
+        error_message=error_dictionary[error_code]
+        
+    return df
+
+    
+def add_hour_no_to_dataframe(df,column_name):
+    """Add hour of a column to a dataframe"""
+    
+    #Possible Errors
+    error_dictionary={0:'No Error'
+                     ,1:'The dataframe is empty'
+                     ,2: 'The dataframe does not contain the required columns'
+                      ,999: 'Uncaught exception'
+                     }
+    
+    time_period_name='hourno'
+    new_column_name='{}_{}'
+    
+    try:
+    
+        #dataframe not empty
+        if len(df)>0:
+
+            #column in df
+            if column_name in df.columns:
+                new_column_name=new_column_name.format(column_name,time_period_name)
+                df[column_name]=pd.to_datetime(df[column_name])
+                df[new_column_name]=df[column_name].dt.hour
+
+            #Column not in df
+            else:
+                error_code=2
+                error_message=error_dictionary[error_code]
+                print(error_message)
+
+        #df empty
+        else:
+            error_code=1
+            error_message=error_dictionary[error_code]
+            print(error_message)
+            
+    except Exception as e:
+        error_code=999
+        error_message=error_dictionary[error_code]
+        
+    return df
+
+
+
+#-###-------------------------------------
+#07.03 Availability by timeperiod
+#-###-------------------------------------
+
+def avg_station_availability_by_weekdayno_df(host,user,password,port,db):
+    """Returns the stations by weekdayno"""
+    
+    engine_l=connect_db_engine(host,user,password,port,db)
+    engine=engine_l[1]
+    ldf=pd.DataFrame()
+    
+    groupby_columns=[
+                        'number'
+                        ,'created_date_weekdayno'
+                    ]
+    
+    column_name='created_date'
+    
+    agg_dict={
+               'available_bikes':np.mean
+              ,'available_bike_stands':np.mean
+            }
+    
+    #Possible Errors
+    error_dictionary={
+                      0:'No Error'
+                     ,1:'The database failed to connect'
+                    ,999:'Uncaught Exception: '
+                     }
+    
+    
+    try:
+        
+        #No db error
+        if engine_l[0]==0:
+            
+            #All availability data
+            df=availability_table_df(host,user,password,port,db)
+            
+            #Staging Dataframe - Add time
+            sdf=add_weekday_no_to_dataframe(df,column_name)
+            
+            #Load Dataframe
+            ldf_l=group_by_column(sdf,groupby_columns,agg_dict)
+    
+            ldf=ldf_l[1]
+            
+       #db error 
+        else:
+            error_code=1
+            error_message=error_dictionary[error_code]
+            print(error_message)
+            
+        
+    except Exception as E:
+        error_code=999
+        error_message=error_dictionary[error_code]
+        print(error_message+E)
+        
+    return ldf
+
+def avg_station_availability_by_monthno_df(host,user,password,port,db):
+    """Returns the stations by date"""
+    
+    engine_l=connect_db_engine(host,user,password,port,db)
+    engine=engine_l[1]
+    ldf=pd.DataFrame()
+    
+    groupby_columns=[
+                        'number'
+                        ,'created_date_date'
+                    ]
+    
+    column_name='created_date'
+    
+    agg_dict={
+               'available_bikes':np.mean
+              ,'available_bike_stands':np.mean
+            }
+    
+    #Possible Errors
+    error_dictionary={
+                      0:'No Error'
+                     ,1:'The database failed to connect'
+                    ,999:'Uncaught Exception: '
+                     }
+    
+    
+    try:
+        
+        #No db error
+        if engine_l[0]==0:
+            
+            #All availability data
+            df=availability_table_df(host,user,password,port,db)
+            
+            #Staging Dataframe - Add time
+            sdf=add_month_no_to_dataframe(df,column_name)
+            
+            #Load Dataframe
+            ldf_l=group_by_column(sdf,groupby_columns,agg_dict)
+    
+            ldf=ldf_l[1]
+            
+       #db error 
+        else:
+            error_code=1
+            error_message=error_dictionary[error_code]
+            print(error_message)
+            
+        
+    except Exception as E:
+        error_code=999
+        error_message=error_dictionary[error_code]
+        print(error_message+E)
+        
+    return ldf
+
+def avg_station_availability_by_weekno_df(host,user,password,port,db):
+    """Returns the station no by weekno"""
+    
+    engine_l=connect_db_engine(host,user,password,port,db)
+    engine=engine_l[1]
+    ldf=pd.DataFrame()
+    
+    groupby_columns=[
+                        'number'
+                        ,'created_date_weekno'
+                    ]
+    
+    column_name='created_date'
+    
+    agg_dict={
+               'available_bikes':np.mean
+              ,'available_bike_stands':np.mean
+            }
+    
+    #Possible Errors
+    error_dictionary={
+                      0:'No Error'
+                     ,1:'The database failed to connect'
+                    ,999:'Uncaught Exception: '
+                     }
+    
+    
+    try:
+        
+        #No db error
+        if engine_l[0]==0:
+            
+            #All availability data
+            df=availability_table_df(host,user,password,port,db)
+            
+            #Staging Dataframe - Add time
+            sdf=add_week_no_to_dataframe(df,column_name)
+            
+            #Load Dataframe
+            ldf_l=group_by_column(sdf,groupby_columns,agg_dict)
+    
+            ldf=ldf_l[1]
+            
+       #db error 
+        else:
+            error_code=1
+            error_message=error_dictionary[error_code]
+            print(error_message)
+            
+        
+    except Exception as E:
+        error_code=999
+        error_message=error_dictionary[error_code]
+        print(error_message+E)
+        
+    return ldf
+
+def avg_station_availability_by_date_df(host,user,password,port,db):
+    """Returns the stations by date"""
+    
+    engine_l=connect_db_engine(host,user,password,port,db)
+    engine=engine_l[1]
+    ldf=pd.DataFrame()
+    
+    groupby_columns=[
+                        'number'
+                        ,'created_date_date'
+                    ]
+    
+    column_name='created_date'
+    
+    agg_dict={
+               'available_bikes':np.mean
+              ,'available_bike_stands':np.mean
+            }
+    
+    #Possible Errors
+    error_dictionary={
+                      0:'No Error'
+                     ,1:'The database failed to connect'
+                    ,999:'Uncaught Exception: '
+                     }
+    
+    
+    try:
+        
+        #No db error
+        if engine_l[0]==0:
+            
+            #All availability data
+            df=availability_table_df(host,user,password,port,db)
+            
+            #Staging Dataframe - Add time
+            sdf=add_datestamp_to_dataframe(df,column_name)
+            
+            #Load Dataframe
+            ldf_l=group_by_column(sdf,groupby_columns,agg_dict)
+    
+            ldf=ldf_l[1]
+            
+       #db error 
+        else:
+            error_code=1
+            error_message=error_dictionary[error_code]
+            print(error_message)
+            
+        
+    except Exception as E:
+        error_code=999
+        error_message=error_dictionary[error_code]
+        print(error_message+E)
+        
+    return ldf
+
+def avg_station_availability_by_hourno_df(host,user,password,port,db):
+    """Returns the stations by hour no"""
+    
+    engine_l=connect_db_engine(host,user,password,port,db)
+    engine=engine_l[1]
+    ldf=pd.DataFrame()
+    
+    groupby_columns=[
+                        'number'
+                        ,'created_date_hourno'
+                    ]
+    
+    column_name='created_date'
+    
+    agg_dict={
+               'available_bikes':np.mean
+              ,'available_bike_stands':np.mean
+            }
+    
+    #Possible Errors
+    error_dictionary={
+                      0:'No Error'
+                     ,1:'The database failed to connect'
+                    ,999:'Uncaught Exception: '
+                     }
+    
+    
+    try:
+        
+        #No db error
+        if engine_l[0]==0:
+            
+            #All availability data
+            df=availability_table_df(host,user,password,port,db)
+            
+            #Staging Dataframe - Add time
+            sdf=add_hour_no_to_dataframe(df,column_name)
+            
+            #Load Dataframe
+            ldf_l=group_by_column(sdf,groupby_columns,agg_dict)
+    
+            ldf=ldf_l[1]
+            
+       #db error 
+        else:
+            error_code=1
+            error_message=error_dictionary[error_code]
+            print(error_message)
+            
+        
+    except Exception as E:
+        error_code=999
+        error_message=error_dictionary[error_code]
+        print(error_message+E)
+        
+    return ldf
+
+#-#-###-------------------------------------
+#07.03.1 Availability by timeperiod for a particular station = Runs Faster via SQL WHERE 
+#-#-###-------------------------------------
+
+
+def avg_station_availability_by_weekdayno_df_forstat(host,user,password,port,db,station_no):
+    """Returns the stations by weekdayno"""
+    
+    engine_l=connect_db_engine(host,user,password,port,db)
+    engine=engine_l[1]
+    ldf=pd.DataFrame()
+    
+    groupby_columns=[
+                        'number'
+                        ,'created_date_weekdayno'
+                    ]
+    
+    column_name='created_date'
+    
+    agg_dict={
+               'available_bikes':np.mean
+              ,'available_bike_stands':np.mean
+            }
+    
+    #Possible Errors
+    error_dictionary={
+                      0:'No Error'
+                     ,1:'The database failed to connect'
+                    ,999:'Uncaught Exception: '
+                     }
+    
+    
+    try:
+        
+        #No db error
+        if engine_l[0]==0:
+            
+            #All availability data
+            df=availability_table_for_station_df(host,user,password,port,db,station_no)
+            
+            #Staging Dataframe - Add time
+            sdf=add_weekday_no_to_dataframe(df,column_name)
+            
+            #Load Dataframe
+            ldf_l=group_by_column(sdf,groupby_columns,agg_dict)
+    
+            ldf=ldf_l[1]
+            
+       #db error 
+        else:
+            error_code=1
+            error_message=error_dictionary[error_code]
+            print(error_message)
+            
+        
+    except Exception as E:
+        error_code=999
+        error_message=error_dictionary[error_code]
+        print(error_message+E)
+        
+    return ldf
+
+def avg_station_availability_by_monthno_df_forstat(host,user,password,port,db,station_no):
+    """Returns the stations by date"""
+    
+    engine_l=connect_db_engine(host,user,password,port,db)
+    engine=engine_l[1]
+    ldf=pd.DataFrame()
+    
+    groupby_columns=[
+                        'number'
+                        ,'created_date_date'
+                    ]
+    
+    column_name='created_date'
+    
+    agg_dict={
+               'available_bikes':np.mean
+              ,'available_bike_stands':np.mean
+            }
+    
+    #Possible Errors
+    error_dictionary={
+                      0:'No Error'
+                     ,1:'The database failed to connect'
+                    ,999:'Uncaught Exception: '
+                     }
+    
+    
+    try:
+        
+        #No db error
+        if engine_l[0]==0:
+            
+            #All availability data
+            df=availability_table_for_station_df(host,user,password,port,db,station_no)
+            
+            #Staging Dataframe - Add time
+            sdf=add_month_no_to_dataframe(df,column_name)
+            
+            #Load Dataframe
+            ldf_l=group_by_column(sdf,groupby_columns,agg_dict)
+    
+            ldf=ldf_l[1]
+            
+       #db error 
+        else:
+            error_code=1
+            error_message=error_dictionary[error_code]
+            print(error_message)
+            
+        
+    except Exception as E:
+        error_code=999
+        error_message=error_dictionary[error_code]
+        print(error_message+E)
+        
+    return ldf
+
+def avg_station_availability_by_weekno_df_forstat(host,user,password,port,db,station_no):
+    """Returns the station no by weekno"""
+    
+    engine_l=connect_db_engine(host,user,password,port,db)
+    engine=engine_l[1]
+    ldf=pd.DataFrame()
+    
+    groupby_columns=[
+                        'number'
+                        ,'created_date_weekno'
+                    ]
+    
+    column_name='created_date'
+    
+    agg_dict={
+               'available_bikes':np.mean
+              ,'available_bike_stands':np.mean
+            }
+    
+    #Possible Errors
+    error_dictionary={
+                      0:'No Error'
+                     ,1:'The database failed to connect'
+                    ,999:'Uncaught Exception: '
+                     }
+    
+    
+    try:
+        
+        #No db error
+        if engine_l[0]==0:
+            
+            #All availability data
+            df=availability_table_for_station_df(host,user,password,port,db,station_no)
+            
+            #Staging Dataframe - Add time
+            sdf=add_week_no_to_dataframe(df,column_name)
+            
+            #Load Dataframe
+            ldf_l=group_by_column(sdf,groupby_columns,agg_dict)
+    
+            ldf=ldf_l[1]
+            
+       #db error 
+        else:
+            error_code=1
+            error_message=error_dictionary[error_code]
+            print(error_message)
+            
+        
+    except Exception as E:
+        error_code=999
+        error_message=error_dictionary[error_code]
+        print(error_message+E)
+        
+    return ldf
+
+def avg_station_availability_by_date_df_forstat(host,user,password,port,db,station_no):
+    """Returns the stations by date"""
+    
+    engine_l=connect_db_engine(host,user,password,port,db)
+    engine=engine_l[1]
+    ldf=pd.DataFrame()
+    
+    groupby_columns=[
+                        'number'
+                        ,'created_date_date'
+                    ]
+    
+    column_name='created_date'
+    
+    agg_dict={
+               'available_bikes':np.mean
+              ,'available_bike_stands':np.mean
+            }
+    
+    #Possible Errors
+    error_dictionary={
+                      0:'No Error'
+                     ,1:'The database failed to connect'
+                    ,999:'Uncaught Exception: '
+                     }
+    
+    
+    try:
+        
+        #No db error
+        if engine_l[0]==0:
+            
+            #All availability data
+            df=availability_table_for_station_df(host,user,password,port,db,station_no)
+            
+            #Staging Dataframe - Add time
+            sdf=add_datestamp_to_dataframe(df,column_name)
+            
+            #Load Dataframe
+            ldf_l=group_by_column(sdf,groupby_columns,agg_dict)
+    
+            ldf=ldf_l[1]
+            
+       #db error 
+        else:
+            error_code=1
+            error_message=error_dictionary[error_code]
+            print(error_message)
+            
+        
+    except Exception as E:
+        error_code=999
+        error_message=error_dictionary[error_code]
+        print(error_message+E)
+        
+    return ldf
+
+def avg_station_availability_by_hourno_df_forstat(host,user,password,port,db,station_no):
+    """Returns the stations by hour no"""
+    
+    engine_l=connect_db_engine(host,user,password,port,db)
+    engine=engine_l[1]
+    ldf=pd.DataFrame()
+    
+    groupby_columns=[
+                        'number'
+                        ,'created_date_hourno'
+                    ]
+    
+    column_name='created_date'
+    
+    agg_dict={
+               'available_bikes':np.mean
+              ,'available_bike_stands':np.mean
+            }
+    
+    #Possible Errors
+    error_dictionary={
+                      0:'No Error'
+                     ,1:'The database failed to connect'
+                    ,999:'Uncaught Exception: '
+                     }
+    
+    
+    try:
+        
+        #No db error
+        if engine_l[0]==0:
+            
+            #All availability data
+            df=availability_table_for_station_df(host,user,password,port,db,station_no)
+            
+            #Staging Dataframe - Add time
+            sdf=add_hour_no_to_dataframe(df,column_name)
+            
+            #Load Dataframe
+            ldf_l=group_by_column(sdf,groupby_columns,agg_dict)
+    
+            ldf=ldf_l[1]
+            
+       #db error 
+        else:
+            error_code=1
+            error_message=error_dictionary[error_code]
+            print(error_message)
+            
+        
+    except Exception as E:
+        error_code=999
+        error_message=error_dictionary[error_code]
+        print(error_message+E)
+        
+    return ldf

@@ -105,10 +105,9 @@ SQL_select_availability_where_number="""
         ,FROM_UNIXTIME(avail.{})             AS              last_update
         ,FROM_UNIXTIME(avail.{})             AS              created_date
     FROM
-        avail.{} avail
+        {} avail
     WHERE
-        avail.{}
-    """.format(
+        avail.{}""".format(
             'number'
             ,'available_bikes'
             ,'available_bike_stands'
