@@ -630,7 +630,7 @@ def add_weekday_no_to_dataframe(df,column_name):
                       ,999: 'Uncaught exception'
                      }
     
-    time_period_name='dayno'
+    time_period_name='weekdayno'
     new_column_name='{}_{}'
     
     try:
