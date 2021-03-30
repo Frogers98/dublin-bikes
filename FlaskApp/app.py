@@ -33,11 +33,11 @@ app = Flask(__name__)
 #02.DEFINE DATABASE CONNECTION
 ####--------------------------------------
 
-# myhost=database_dictionary['endpoint']
-# myuser=database_dictionary['username']
-# mypassword=database_dictionary['password']
-# myport=database_dictionary['port']
-# mydb=database_dictionary['database']
+myhost=database_dictionary['endpoint']
+myuser=database_dictionary['username']
+mypassword=database_dictionary['password']
+myport=database_dictionary['port']
+mydb=database_dictionary['database']
 
 # myhost=fr_database_dictionary['endpoint']
 # myuser=fr_database_dictionary['username']
@@ -106,6 +106,67 @@ def availability_request():
     result=station_availability_last_update_table_df(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
     
     return result
+
+
+###----ROUTES FOR ANALYTICS----####
+
+###----All Station Averages----####
+@app.route("/station_availability_stat_by_weekdayno")
+def station_availability_stat_by_weekdayno():
+    """Returns a dataframe of the station and availability data"""
+    result=avg_station_availability_by_weekdayno_df(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
+    result.to_json(orient="records")
+
+    return result
+
+@app.route("/station_availability_stat_by_dayno")
+def station_availability_stat_by_dayno():
+    """Returns a dataframe of the station and availability data"""
+
+    result=avg_station_availability_by_dayno_df(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
+    result.to_json(orient="records")
+
+    return result
+
+@app.route("/station_availability_stat_by_date")
+def station_availability_stat_by_date():
+    """Returns a dataframe of the station and availability data"""
+
+    result=avg_station_availability_by_date_df(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
+    result.to_json(orient="records")
+
+    return result
+
+
+@app.route("/station_availability_stat_by_monthno")
+def station_availability_stat_by_monthno():
+    """Returns a dataframe of the station and availability data"""
+
+    result=avg_station_availability_by_monthno_df(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
+    result.to_json(orient="records")
+
+    return result
+
+@app.route("/station_availability_stat_by_hourno")
+def station_availability_stat_by_hourno():
+    """Returns a dataframe of the station and availability data"""
+
+    result=avg_station_availability_by_hourno_df(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
+    result.to_json(orient="records")
+
+    return result
+
+
+@app.route("/station_availability_stat_by_weekno")
+def station_availability_stat_by_weekno():
+    """Returns a dataframe of the station and availability data"""
+
+    result=avg_station_availability_by_weekno_df(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
+    result.to_json(orient="records")
+
+    return result
+
+
 
 @app.route("/availability_v2")
 def recentUpdate():

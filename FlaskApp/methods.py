@@ -502,7 +502,7 @@ def group_by_column(df,groupby_columns,agg_dict):
     Input: df, columns to group by, agg_dictionary
     """
     
-    print("inside group_by_column(df,{},{})".format(groupby_columns,agg_dictionary))
+    print("inside group_by_column(df,{},{})".format(groupby_columns,agg_dict))
     
     #Possible Errors
     error_dictionary={0:'No Error'
