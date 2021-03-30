@@ -120,15 +120,6 @@ def station_availability_stat_by_weekdayno():
 
     return result
 
-@app.route("/station_availability_stat_by_dayno")
-def station_availability_stat_by_dayno():
-    """Returns a dataframe of the station and availability data"""
-
-    result=avg_station_availability_by_dayno_df(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
-    result=result.to_json(orient="records")
-
-    return result
-
 @app.route("/station_availability_stat_by_date")
 def station_availability_stat_by_date():
     """Returns a dataframe of the station and availability data"""
@@ -178,14 +169,6 @@ def single_station_availability_stat_by_weekdayno(no):
 
     return result
 
-@app.route("/single_station_availability_stat_by_dayno/<no>")
-def single_station_availability_stat_by_dayno(no):
-    """Returns a dataframe of the station and availability data"""
-
-    result=avg_station_availability_by_dayno_df_forstat(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb,station_no=no)
-    result=result.to_json(orient="records")
-
-    return result
 
 @app.route("/single_station_availability_stat_by_date/<no>")
 def single_station_availability_stat_by_date(no):
