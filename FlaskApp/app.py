@@ -211,7 +211,7 @@ def single_station_availability_stat_by_weekno(no):
     return result
 
 
-
+###----Specific Station Average Wrapper----####
 @app.route("/metric/<metric_type>/<station_no>")
 def metric_type_average_avail_for_station(metric_type,station_no):
     """Returns a dataframe of the station and availability data"""
