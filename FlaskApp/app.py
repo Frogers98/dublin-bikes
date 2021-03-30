@@ -111,6 +111,8 @@ def availability_request():
 ###----ROUTES FOR ANALYTICS----####
 
 ###----All Station Averages----####
+
+
 @app.route("/station_availability_stat_by_weekdayno")
 def station_availability_stat_by_weekdayno():
     """Returns a dataframe of the station and availability data"""
@@ -210,6 +212,34 @@ def single_station_availability_stat_by_weekno(no):
 
 
 
+@app.route("/metric/<metric_type>/<station_no>")
+def metric_type_average_avail_for_station(metric_type,station_no):
+    """Returns a dataframe of the station and availability data"""
+
+   #Hour 
+    if metric_type=='Hours':
+        result_json=single_station_availability_stat_by_hourno(no=station_no)
+
+    #Weekday
+    elif metric_type=='Day':
+        result_json=single_station_availability_stat_by_weekdayno(no=station_no)
+
+    #Month
+    elif metric_type=='Month':
+        result_json=single_station_availability_stat_by_monthno(no=station_no)
+
+    #Date
+    elif metric_type=='Date':
+        result_json=single_station_availability_stat_by_date(no=station_no)
+
+    #Week
+    elif metric_type=='Week':
+        result_json=single_station_availability_stat_by_weekno(no=station_no)
+
+    else:
+        print('Unknown Metric and Week')
+
+    return result_json
 
 
 @app.route("/availability_v2")
