@@ -168,6 +168,66 @@ def station_availability_stat_by_weekno():
     return result
 
 
+###----Specific Station Averages----####
+@app.route("/single_station_availability_stat_by_weekdayno/<no>")
+def single_station_availability_stat_by_weekdayno(no):
+    """Returns a dataframe of the station and availability data"""
+    result=avg_station_availability_by_weekdayno_df_forstat(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb,station_no=no)
+    
+    result=result.to_json(orient="records")
+
+    return result
+
+@app.route("/single_station_availability_stat_by_dayno/<no>")
+def single_station_availability_stat_by_dayno(no):
+    """Returns a dataframe of the station and availability data"""
+
+    result=avg_station_availability_by_dayno_df_forstat(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb,station_no=no)
+    result=result.to_json(orient="records")
+
+    return result
+
+@app.route("/single_station_availability_stat_by_date/<no>")
+def single_station_availability_stat_by_date(no):
+    """Returns a dataframe of the station and availability data"""
+
+    result=avg_station_availability_by_date_df_forstat(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb,station_no=no)
+    result=result.to_json(orient="records")
+
+    return result
+
+
+@app.route("/single_station_availability_stat_by_monthno/<no>")
+def single_station_availability_stat_by_monthno(no):
+    """Returns a dataframe of the station and availability data"""
+
+    result=avg_station_availability_by_monthno_df_forstat(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb,station_no=no)
+    result=result.to_json(orient="records")
+
+    return result
+
+@app.route("/single_station_availability_stat_by_hourno/<no>")
+def single_station_availability_stat_by_hourno(no):
+    """Returns a dataframe of the station and availability data"""
+
+    result=avg_station_availability_by_hourno_df_forstat(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb,station_no=no)
+    result=result.to_json(orient="records")
+
+    return result
+
+
+@app.route("/single_station_availability_stat_by_weekno/<no>")
+def single_station_availability_stat_by_weekno(no):
+    """Returns a dataframe of the station and availability data"""
+
+    result=avg_station_availability_by_weekno_df_forstat(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb,station_no=no)
+    result=result.to_json(orient="records")
+
+    return result
+
+
+
+
 
 @app.route("/availability_v2")
 def recentUpdate():
