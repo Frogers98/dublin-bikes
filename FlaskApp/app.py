@@ -249,6 +249,9 @@ def recentUpdate():
     return avail_df.to_json(orient='records')
 
 
+
+###----RUN----####
+
 from FlaskApp.tests import run_tests
 
 if __name__=="__main__":
