@@ -115,7 +115,8 @@ def availability_request():
 def station_availability_stat_by_weekdayno():
     """Returns a dataframe of the station and availability data"""
     result=avg_station_availability_by_weekdayno_df(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
-    result.to_json(orient="records")
+    
+    result=result.to_json(orient="records")
 
     return result
 
@@ -124,7 +125,7 @@ def station_availability_stat_by_dayno():
     """Returns a dataframe of the station and availability data"""
 
     result=avg_station_availability_by_dayno_df(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
-    result.to_json(orient="records")
+    result=result.to_json(orient="records")
 
     return result
 
@@ -133,7 +134,7 @@ def station_availability_stat_by_date():
     """Returns a dataframe of the station and availability data"""
 
     result=avg_station_availability_by_date_df(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
-    result.to_json(orient="records")
+    result=result.to_json(orient="records")
 
     return result
 
@@ -143,7 +144,7 @@ def station_availability_stat_by_monthno():
     """Returns a dataframe of the station and availability data"""
 
     result=avg_station_availability_by_monthno_df(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
-    result.to_json(orient="records")
+    result=result.to_json(orient="records")
 
     return result
 
@@ -152,7 +153,7 @@ def station_availability_stat_by_hourno():
     """Returns a dataframe of the station and availability data"""
 
     result=avg_station_availability_by_hourno_df(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
-    result.to_json(orient="records")
+    result=result.to_json(orient="records")
 
     return result
 
@@ -162,7 +163,7 @@ def station_availability_stat_by_weekno():
     """Returns a dataframe of the station and availability data"""
 
     result=avg_station_availability_by_weekno_df(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
-    result.to_json(orient="records")
+    result=result.to_json(orient="records")
 
     return result
 
