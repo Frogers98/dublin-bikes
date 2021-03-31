@@ -33,11 +33,11 @@ app = Flask(__name__)
 #02.DEFINE DATABASE CONNECTION
 ####--------------------------------------
 
-# myhost=database_dictionary['endpoint']
-# myuser=database_dictionary['username']
-# mypassword=database_dictionary['password']
-# myport=database_dictionary['port']
-# mydb=database_dictionary['database']
+myhost=database_dictionary['endpoint']
+myuser=database_dictionary['username']
+mypassword=database_dictionary['password']
+myport=database_dictionary['port']
+mydb=database_dictionary['database']
 
 # myhost=fr_database_dictionary['endpoint']
 # myuser=fr_database_dictionary['username']
@@ -65,8 +65,8 @@ def debug_hello():
 def about():
     """An about page to show about stuff - maybe we can make this the main page?"""
 
-    graph_df=stations_by_day(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
-    print(graph_df)
+    # graph_df=stations_by_day(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
+    # print(graph_df)
     
     return render_template('about.html')
 

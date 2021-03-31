@@ -21,6 +21,9 @@ Note: Use CTRL+F and the Number with a dot to navigate to that section.
 let map;
 
 function initMap() {
+    // Load google charts
+    google.charts.load('current', {'packages':['corechart']});
+
     fetch("/stations")
     .then(
             response => 
@@ -106,7 +109,8 @@ function initMap() {
 
                          this.infowindow.open(map,marker);
                          showChartHolder(this.number);
-
+                        graphDailyInfo(this.number, this.name);
+                        graphHourlyInfo(this.number, this.name);
                     });
                 });
                 
@@ -215,3 +219,76 @@ function showChartHolder(stationNumber) {
 // function myClick(stationNumber){
 //     google.maps.event.trigger(markersArray[stationNumber], 'click');
 // }
+function graphDailyInfo(stationNumber, stationName) {
+    // Function to graph the average availability by day for a clicked station
+    console.log("IN graphDailyINfo Station number is: " + stationNumber)
+
+    console.log("Station info for station" + stationNumber)
+    // Fetch the data
+    fetch(`single_station_availability_stat_by_date/${stationNumber}`).then(
+        response => {
+            return response.json();
+        }
+    ).then(
+        data => {
+            console.log("data for this station is:");
+            console.log(data);
+
+            // Info for the graph such as title
+            var options = {
+                title: `Average availability by day for ${stationName}`,
+                // curveType: 'function',
+                // legend: { position: 'bottom' }
+            };
+            // Load the chart object from the api
+            var chart_data = new google.visualization.DataTable();
+            // Make columns for the chart and specify their type and title
+            chart_data.addColumn('datetime', 'Date');
+            chart_data.addColumn('number', 'Available bikes');
+            // Loop through each days average data that was retrieved from flask, add info from each day as a row in the google DataTable
+            data.forEach(entry => {
+                chart_data.addRow([new Date(entry.created_date_date), entry.available_bikes])
+            })
+            // Specify where the chart will be drawn and draw it
+            var chart = new google.visualization.ColumnChart(document.getElementById('chart1'));
+            chart.draw(chart_data, options);
+
+        });
+}
+
+function graphHourlyInfo(stationNumber, stationName) {
+    // Function to graph the average availability by hour for a clicked station
+    console.log("IN graphHourlyINfo Station number is: " + stationNumber)
+
+    console.log("Station info for station" + stationNumber)
+    // Fetch the data
+    fetch(`single_station_availability_stat_by_hourno/${stationNumber}`).then(
+        response => {
+            return response.json();
+        }
+    ).then(
+        data => {
+            console.log("data for this station is:");
+            console.log(data);
+
+            // Info for the graph such as title
+            var options = {
+                title: `Average availability by hour for ${stationName}`,
+                // curveType: 'function',
+                // legend: { position: 'bottom' }
+            };
+            // Load the chart object from the api
+            var chart_data = new google.visualization.DataTable();
+            // Make columns for the chart and specify their type and title
+            chart_data.addColumn('datetime', 'Date');
+            chart_data.addColumn('number', 'Available bikes');
+            // Loop through each days average data that was retrieved from flask, add info from each day as a row in the google DataTable
+            data.forEach(entry => {
+                chart_data.addRow([new Date(entry.created_date_hourno), entry.available_bikes])
+            })
+            // Specify where the chart will be drawn and draw it
+            var chart = new google.visualization.ColumnChart(document.getElementById('chart2'));
+            chart.draw(chart_data, options);
+
+        });
+}
