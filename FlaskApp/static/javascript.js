@@ -280,11 +280,11 @@ function graphHourlyInfo(stationNumber, stationName) {
             // Load the chart object from the api
             var chart_data = new google.visualization.DataTable();
             // Make columns for the chart and specify their type and title
-            chart_data.addColumn('datetime', 'Date');
+            chart_data.addColumn('number', 'Date');
             chart_data.addColumn('number', 'Available bikes');
             // Loop through each days average data that was retrieved from flask, add info from each day as a row in the google DataTable
             data.forEach(entry => {
-                chart_data.addRow([new Date(entry.created_date_hourno), entry.available_bikes])
+                chart_data.addRow([entry.created_date_hourno, entry.available_bikes])
             })
             // Specify where the chart will be drawn and draw it
             var chart = new google.visualization.ColumnChart(document.getElementById('chart2'));
