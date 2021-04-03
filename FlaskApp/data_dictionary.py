@@ -55,6 +55,20 @@ database_schema={
                                 ,'created_date':'BIGINT'
                                 }
 
+                    ,'02_availability_train':{
+                                'number':'INTEGER'
+                                ,'available_bikes':'INTEGER'
+                                ,'available_bike_stands':'INTEGER'
+                                ,'last_update':'BIGINT'
+                                ,'created_date':'BIGINT'
+                                }
+,                   '02_availability_test':{
+                                'number':'INTEGER'
+                                ,'available_bikes':'INTEGER'
+                                ,'available_bike_stands':'INTEGER'
+                                ,'last_update':'BIGINT'
+                                ,'created_date':'BIGINT'
+                                }
                     ,'01_weather':{
                                 'number': 'INT'
                                 ,'position_long':'REAL'
