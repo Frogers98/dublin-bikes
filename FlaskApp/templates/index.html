@@ -98,7 +98,14 @@
                           <option value="{{ station.number }}">{{ station.name }}</option>
                           {% endfor %}
                       </select>
+
+                      <div id="locationSearch">
+                          <input type="text" id="enterLocation" placeholder="Enter a location" />
+                      </div>
+
                   </div>
+            <div id="side_panel_default"></div>
+            <div id="nearestStationHolder"></div>
             <div id="chartHolder">
                 <div id="chart1">Display Chart 1</div>
                 <div id="chart2">Display Chart 2</div>
@@ -124,7 +131,7 @@
 
   <!--BEGIN: GOOGLE ASYNC at END OF DOM ELEMENTS IN BODY-->
      <script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDbU4W2J29Zz3Jz8gkcgImNj4YRwgLZCoQ&callback=initMap&libraries=&v=weekly"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDbU4W2J29Zz3Jz8gkcgImNj4YRwgLZCoQ&callback=initMap&libraries=places,geometry&v=weekly"
           async>
       // AR_API:
       // https://maps.googleapis.com/maps/api/js?key=AIzaSyC9btECtY48D3C-qx36Lt0gmUQK9XlYkM0&callback=initMap&libraries=&v=weekly

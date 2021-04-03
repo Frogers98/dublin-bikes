@@ -167,6 +167,14 @@ body {
     background-color: #f5f5f5;
 }
 
+#side_panel_default {
+    position: absolute;
+    height: 75%;
+    width: 90%;
+    align-self: center;
+    background-color: #f5f5f5;
+}
+
   #headFilterArea {
       position: absolute;
       float: right;
@@ -176,8 +184,16 @@ body {
       text-decoration: none;
 }
 
+  #nearestStationHolder {
+    position: absolute;
+    height: 75%;
+    width: 90%;
+    align-self: center;
+    background-color: #f5f5f5;
+  }
+
   #chartHolder {
-      position: relative;
+      position: absolute;
       height: 85%;
       width: 90%;
       align-self: center;
@@ -210,6 +226,17 @@ body {
         background-color: #ffffff;
   }
 
+    #side_panel_default {
+        font-family: 'Quicksand', sans-serif;
+        font-size: 10pt;
+    }
+
+    .place {
+        font-weight: bold;
+    }
+
+    /*.nearestStationDetails {*/
+    /*}*/
 
 /*--------- 5. Link styling -------------*/
 
