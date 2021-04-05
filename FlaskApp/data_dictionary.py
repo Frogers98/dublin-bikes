@@ -9,7 +9,7 @@
 ##------------------APP---------------##
 
 
-fr_database_dictionary={
+database_dictionary={
                         'username':'adamryan'
                         ,'password':'adam.ryan1'
                         ,'database':'dbbikes'
@@ -18,7 +18,7 @@ fr_database_dictionary={
                     }
 
 
-database_dictionary={
+fr_database_dictionary={
                         'username':'admin'
                         ,'password':'DublinBikesProject2201'
                         ,'database':'dublin_bikes'
@@ -113,7 +113,6 @@ database_schema={
                                 ,'description':'VARCHAR(500)'
                                 ,'icon':'VARCHAR(20)'
                                 ,'icon_url':'VARCHAR(500)'
-                                ,'base':'varchar(256)'
                                 ,'temp':'REAL'
                                 ,'feels_like':'REAL'
                                 ,'temp_min':'REAL'
