@@ -104,7 +104,7 @@ database_schema={
 
                     ,'01_forecast':{
         # Removed base, timezone, avail_update_dt, datetime, id_var, name, cod and all 'sys' entries when compared to original scraper
-        # Added forecast_time_dt and forecast_time_txt
+        # Added forecast_time_dt and forecast_time_txt to show the forecast times in readable format
                                 'number': 'INT'
                                 ,'position_long':'REAL'
                                 ,'position_lat':'REAL'
