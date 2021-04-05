@@ -9,7 +9,7 @@
 ##------------------APP---------------##
 
 
-database_dictionary={
+fr_database_dictionary={
                         'username':'adamryan'
                         ,'password':'adam.ryan1'
                         ,'database':'dbbikes'
@@ -18,7 +18,7 @@ database_dictionary={
                     }
 
 
-fr_database_dictionary={
+database_dictionary={
                         'username':'admin'
                         ,'password':'DublinBikesProject2201'
                         ,'database':'dublin_bikes'
@@ -99,6 +99,33 @@ database_schema={
                                 ,'id':'BIGINT'
                                 ,'name':'VARCHAR(256)'
                                 ,'cod':'INT'
+                                ,'created_date':'BIGINT'
+                                }
+
+                    ,'01_forecast':{
+        # Removed base, timezone, avail_update_dt, datetime, id_var, name, cod and all 'sys' entries when compared to original scraper
+        # Added forecast_time_dt and forecast_time_txt
+                                'number': 'INT'
+                                ,'position_long':'REAL'
+                                ,'position_lat':'REAL'
+                                ,'weather_id':'INTEGER'
+                                ,'main':'VARCHAR(256)'
+                                ,'description':'VARCHAR(500)'
+                                ,'icon':'VARCHAR(20)'
+                                ,'icon_url':'VARCHAR(500)'
+                                ,'base':'varchar(256)'
+                                ,'temp':'REAL'
+                                ,'feels_like':'REAL'
+                                ,'temp_min':'REAL'
+                                ,'temp_max':'REAL'
+                                ,'pressure':'INT'
+                                ,'humidity':'INT'
+                                ,'visibility':'INT'
+                                ,'wind_speed':'REAL'
+                                ,'wind_degree':'INT'
+                                ,'clouds_all':'INT'
+                                ,'forecast_time_dt':'BIGINT'
+                                ,'forecast_time_txt':'VARCHAR(500)'
                                 ,'created_date':'BIGINT'
                                 }
                 }
