@@ -136,7 +136,6 @@ body {
     padding-left: 5px
  }
 
-
 /*#map-area {*/
 /*    height: 100%;*/
 /*    width: 100%;*/
@@ -153,6 +152,26 @@ body {
     /*height: 100%;*/
     /*width: 100%*/
  }
+
+#directionsPanel {
+    position: absolute;
+    top: 10px;
+    left: 25%;
+    z-index: 5;
+    background-color: #fff;
+    padding: 5px;
+    border: 1px solid #999;
+    /*text-align: center;*/
+    /*font-family: "Roboto", "sans-serif";*/
+    /*line-height: 30px;*/
+    padding-left: 10px;
+}
+
+/*    position: absolute;*/
+/*    top: 10px;*/
+/*    right: 10px;*/
+/*    z-index: 99; */
+/*}*/
 
 /*-------- 5. Side Panel styling  -------*/
 
@@ -241,6 +260,10 @@ body {
         text-align: left;
     }
 
+    #right-panel {
+        margin-left: 200px;
+        z-index: 5;
+    }
 /*--------- 5. Link styling -------------*/
 
 /* href Styling */

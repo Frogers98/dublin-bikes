@@ -24,12 +24,15 @@ let geoJson = {};
 geoJson["type"] = "FeatureCollection";
 geoJson["features"] = [];
 
+let directionsService;
+let directionsRenderer;
+
 function initMap() {
     // Load google charts
     google.charts.load('current', {'packages':['corechart']});
 
-    // const directionsService = new google.maps.DirectionsService();
-    // const directionsRenderer = new google.maps.DirectionsRenderer();
+    directionsService = new google.maps.DirectionsService();
+    directionsRenderer = new google.maps.DirectionsRenderer();
 
 var styleArray = [
   {"elementType": "geometry", "stylers": [{"color": "#f5f5f5"}]},
@@ -75,8 +78,13 @@ var styleArray = [
             zoom: 13.5,
             // markersArray: [], // Array to hold all markers
         });
-    // directionsRenderer.setMap(map);
+
     map.setOptions({styles: styleArray});
+
+    directionsRenderer.setMap(map);
+    directionsRenderer.setPanel(document.getElementById("right-panel"));
+    // const directionsDisplay = document.getElementById("directionsPanel")
+    // map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(directionsDisplay);
 
 fetch("/stations")
     .then(
@@ -220,7 +228,7 @@ fetch("/stations")
                 enteredLocationMarker.setVisible(true);
 
                 const rankedStations = await calculateDistances(map.data, enteredLocation);
-                showStationsList(map.data, rankedStations);
+                showStationsList(map.data, rankedStations, enteredLocation);
             });
 
             }).catch(
@@ -313,7 +321,7 @@ async function calculateDistances(data, origin) {
    return distancesList;
 }
 
-function showStationsList(data, stations) {
+function showStationsList(data, stations, originLocation) {
     if (stations.length == 0) {
         console.log("empty stations list");
         return;
@@ -323,11 +331,13 @@ function showStationsList(data, stations) {
     //
     // hideCharts("stationSelector", "showAll");
     //
-    // while (panel.lastChild) {
-    //       panel.removeChild(panel.lastChild);
-    // }
 
-    var nearestStationTable = "<table class='nearestStationTable'>";
+    const nearestStationTable = document.getElementById("nearestStationHolder");
+
+    while (nearestStationTable.lastChild) {
+          nearestStationTable.removeChild(nearestStationTable.lastChild);
+    }
+
       for (var i = 0; i < 5; i++) {
           const currentStationObject = stations[i];
           const currentStationNumber = currentStationObject.stationNumber;
@@ -336,13 +346,40 @@ function showStationsList(data, stations) {
           const currentStationDistText = currentStationObject.distanceText;
           const currentStationBikes = currentStationDetails.getProperty("available_bikes");
           const currentStationStands = currentStationDetails.getProperty("available_bike_stands");
+          const stationLatLng = currentStationDetails.getGeometry().get();
 
-          nearestStationTable += "<tr onclick='nearestStationInfo(" + currentStationNumber + ")'><th style='text-align: left;'>" + currentStationName + "</th></tr><tr><td>Walking distance: " + currentStationDistText + "</td></tr></tr><tr><td>Available bikes: " + currentStationBikes + "</td></tr><tr><td>Available stands: " + currentStationStands + "</td></tr>";
+          const stationNameRow = nearestStationTable.insertRow();
+          stationNameRow.setAttribute("id", "stationNameRow");
+          stationNameRow.addEventListener("click", function () {
+              nearestStationInfo(currentStationNumber);
+          });
+          // document.getElementById("nearestStationHolder").appendChild(stationNameRow);
+          const stationNameCell = stationNameRow.insertCell();
+          stationNameCell.innerHTML = currentStationName;
 
+          const walkingDistRow = nearestStationTable.insertRow();
+          walkingDistRow.setAttribute("id", "walkingDistRow");
+          const walkingDistCell = walkingDistRow.insertCell();
+          walkingDistCell.innerHTML = "Walking distance: " + currentStationDistText;
+
+          const availBikesRow = nearestStationTable.insertRow();
+          availBikesRow.setAttribute("id", "availBikesRow");
+          const availBikesCell = availBikesRow.insertCell();
+          availBikesCell.innerHTML = "Available bikes: " + currentStationBikes;
+
+          const availStandsRow = nearestStationTable.insertRow();
+          availStandsRow.setAttribute("id", "availStandsRow");
+          const availStandsCell = availStandsRow.insertCell();
+          availStandsCell.innerHTML = "Available stands: " + currentStationStands;
+
+          const getDirectionsRow = nearestStationTable.insertRow();
+          getDirectionsRow.setAttribute("id", "getDirectionsRow");
+          getDirectionsRow.addEventListener("click", function () {
+              calculateAndDisplayRoute(originLocation, stationLatLng)
+          });
+          const getDirectionsCell = getDirectionsRow.insertCell();
+          getDirectionsCell.innerHTML = "Get directions";
       }
-
-      nearestStationTable += "</table>";
-      document.getElementById("side_panel_default").innerHTML=nearestStationTable;
 }
 
 function filterMarkers(markerNumber) {
@@ -524,7 +561,8 @@ function hideCharts(id, valueToSelect) {
     }
 }
 
-function nearestStationInfo(stationNumber) {
+function nearestStationInfo(stationNumber, stationName) {
+    // alert(stationName);
     for (let i = 0; i < markersArray.length; i++) {
         let currentMarker = markersArray[i];
         if (currentMarker.number == stationNumber) {
@@ -533,4 +571,21 @@ function nearestStationInfo(stationNumber) {
             currentMarker.infowindow.close(map, currentMarker);
         }
     }
+}
+
+function calculateAndDisplayRoute(originLocation, stationLocation) {
+  directionsService.route(
+    {
+      origin: originLocation,
+      destination: stationLocation,
+      travelMode: google.maps.TravelMode.WALKING,
+    },
+    (response, status) => {
+      if (status === "OK") {
+        directionsRenderer.setDirections(response);
+      } else {
+        window.alert("Directions request failed due to " + status);
+      }
+    }
+  );
 }
