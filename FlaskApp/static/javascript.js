@@ -28,12 +28,16 @@ function initMap() {
     // Load google charts
     google.charts.load('current', {'packages':['corechart']});
 
+    // const directionsService = new google.maps.DirectionsService();
+    // const directionsRenderer = new google.maps.DirectionsRenderer();
+
     map = new google.maps.Map(document.getElementById("map"),
         {
             center: {lat: 53.349804, lng: -6.260310},
             zoom: 13.5,
             // markersArray: [], // Array to hold all markers
         });
+    // directionsRenderer.setMap(map);
 
 fetch("/stations")
     .then(
@@ -190,27 +194,45 @@ fetch("/stations")
 async function calculateDistances(data, origin) {
 
     // Distance matrix used to calculate walking distance between location entered and nearest stations
-    const originLatLng = new google.maps.LatLng(origin.lat(), origin.lng())
+    const originLatLng = new google.maps.LatLng(origin.lat(), origin.lng());
     console.log("ORIGIN LATLNG", originLatLng.lat(), originLatLng.lng());
 
     const stations = [];
     const destinations = [];
+    const stationDistances = [];
 
     data.forEach((station) => {
         const stationNum = station.getProperty("number");
         const stationLatLng = station.getGeometry().get();
-        console.log("STATION LATLNG", stationLatLng.lat(), stationLatLng.lng())
+        // console.log("STATION LATLNG", stationLatLng.lat(), stationLatLng.lng())
 
-        // Distance matrix only works for up to 25 destinations, narrowing down stations to those within 600m radius, need to add loop to increase if none detected
+        // Distance matrix only works for up to 25 destinations, narrowing down stations
         const distanceBetween = google.maps.geometry.spherical.computeDistanceBetween(stationLatLng, originLatLng);
-        console.log("DISTANCE BETWEEN", distanceBetween);
 
-            if (distanceBetween < 600) {
-                stations.push(stationNum);
-                destinations.push(stationLatLng);
-            }
+        const stationDistance = {
+            stationNumber: stationNum,
+            stationGEOM: stationLatLng,
+            stationDist: distanceBetween,
+        }
+
+        stationDistances.push(stationDistance);
     });
-    console.log("ARRAY", destinations.length);
+
+    stationDistances.sort((first, second) => {
+       return first.stationDist - second.stationDist;
+    });
+
+    const slicedDistances = stationDistances.slice(0, 10);
+    console.log("NEW ARRAY LENGTH", slicedDistances.length);
+    console.log("CLOSEST", stationDistances[0]);
+
+    slicedDistances.forEach((station) => {
+        stations.push(station.stationNumber);
+        destinations.push(station.stationGEOM);
+        });
+
+    console.log(stations.length);
+    console.log(destinations.length);
 
     const service = new google.maps.DistanceMatrixService();
     const getDistanceMatrix =
@@ -247,6 +269,7 @@ async function calculateDistances(data, origin) {
    distancesList.sort((first, second) => {
        return first.distanceVal - second.distanceVal;
    });
+
    console.log(distancesList[0]);
    return distancesList;
 }
@@ -259,9 +282,9 @@ function showStationsList(data, stations) {
     let panel = document.getElementById("side_panel_default");
     // panel.style.display = "block";
 
-      while (panel.lastChild) {
+    while (panel.lastChild) {
           panel.removeChild(panel.lastChild);
-      }
+    }
 
       for (var i = 0; i < 5; i++) {
           const name = document.createElement("p");

@@ -173,6 +173,8 @@ body {
     width: 90%;
     align-self: center;
     background-color: #f5f5f5;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 10pt;
 }
 
   #headFilterArea {
@@ -226,10 +228,10 @@ body {
         background-color: #ffffff;
   }
 
-    #side_panel_default {
-        font-family: 'Quicksand', sans-serif;
-        font-size: 10pt;
-    }
+    /*#side_panel_default {*/
+    /*    font-family: 'Quicksand', sans-serif;*/
+    /*    font-size: 10pt;*/
+    /*}*/
 
     .place {
         font-weight: bold;
