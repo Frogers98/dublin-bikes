@@ -31,6 +31,44 @@ function initMap() {
     // const directionsService = new google.maps.DirectionsService();
     // const directionsRenderer = new google.maps.DirectionsRenderer();
 
+var styleArray = [
+  {"elementType": "geometry", "stylers": [{"color": "#f5f5f5"}]},
+    {"elementType": "labels.icon", "stylers": [{"visibility": "off"}]},
+  {"elementType": "labels.text.stroke", "stylers": [{"color": "#f5f5f5"}]},
+  {"featureType": "administrative.land_parcel",
+      "elementType": "labels.text.fill", "stylers": [{"color": "#bdbdbd"}]},
+  {"featureType": "poi",
+      "elementType": "geometry", "stylers": [{"color": "#eeeeee"}]},
+  {"featureType": "poi",
+      "elementType": "labels.text.fill", "stylers": [{"color": "#757575"}]},
+  {"featureType": "poi.park",
+      "elementType": "geometry", "stylers": [{"color": "#e5e5e5"}]},
+  {"featureType": "poi.park",
+      "elementType": "geometry.fill", "stylers": [{"color": "#c0e7c5"}]},
+  {"featureType": "poi.park",
+      "elementType": "labels.text.fill", "stylers": [{"color": "#9e9e9e"}]},
+  {"featureType": "road",
+      "elementType": "geometry", "stylers": [{"color": "#ffffff"}]},
+  {"featureType": "road.arterial",
+      "elementType": "labels.text.fill", "stylers": [{"color": "#757575"}]},
+  {"featureType": "road.highway",
+      "elementType": "geometry", "stylers": [{"color": "#dadada"}]},
+  {"featureType": "road.highway",
+      "elementType": "labels.text.fill", "stylers": [{"color": "#616161"}]},
+  {"featureType": "road.local",
+      "elementType": "labels.text.fill", "stylers": [{"color": "#9e9e9e"}]},
+  {"featureType": "transit.line",
+      "elementType": "geometry", "stylers": [{"color": "#e5e5e5"}]},
+  {"featureType": "transit.station",
+      "elementType": "geometry", "stylers": [{"color": "#eeeeee"}]},
+  {"featureType": "water",
+      "elementType": "geometry", "stylers": [{"color": "#c9c9c9"}]},
+  {"featureType": "water",
+      "elementType": "geometry.fill", "stylers": [{"color": "#cce3f5"}]},
+  {"featureType": "water",
+      "elementType": "labels.text.fill", "stylers": [{"color": "#9e9e9e"}]}
+]
+
     map = new google.maps.Map(document.getElementById("map"),
         {
             center: {lat: 53.349804, lng: -6.260310},
@@ -38,6 +76,7 @@ function initMap() {
             // markersArray: [], // Array to hold all markers
         });
     // directionsRenderer.setMap(map);
+    map.setOptions({styles: styleArray});
 
 fetch("/stations")
     .then(
@@ -105,7 +144,7 @@ fetch("/stations")
                         }
                     );
 
-                    google.maps.event.addListener(map, 'click', function() {
+                    google.maps.event.addListener(map, "click", function() {
                         station_info_window.close();
                     });
 
@@ -279,40 +318,31 @@ function showStationsList(data, stations) {
         console.log("empty stations list");
         return;
     }
-    let panel = document.getElementById("side_panel_default");
-    // panel.style.display = "block";
+    // let panel = document.getElementById("side_panel_default");
+    // // panel.style.display = "block";
+    //
+    // hideCharts("stationSelector", "showAll");
+    //
+    // while (panel.lastChild) {
+    //       panel.removeChild(panel.lastChild);
+    // }
 
-    while (panel.lastChild) {
-          panel.removeChild(panel.lastChild);
-    }
-
+    var nearestStationTable = "<table class='nearestStationTable'>";
       for (var i = 0; i < 5; i++) {
-          const name = document.createElement("p");
-          name.classList.add("place");
-          const currentStation = stations[i];
-          // console.log("LOOP STATION", currentStation);
-          // console.log("ID", currentStation.stationNumber);
-          const currentStationDetails = data.getFeatureById(currentStation.stationNumber)
-          // console.log(currentStationDetails);
-          name.textContent = currentStationDetails.getProperty("name");
-          panel.appendChild(name);
+          const currentStationObject = stations[i];
+          const currentStationNumber = currentStationObject.stationNumber;
+          const currentStationDetails = data.getFeatureById(currentStationNumber);
+          const currentStationName = currentStationDetails.getProperty("name");
+          const currentStationDistText = currentStationObject.distanceText;
+          const currentStationBikes = currentStationDetails.getProperty("available_bikes");
+          const currentStationStands = currentStationDetails.getProperty("available_bike_stands");
 
-          const distanceText = document.createElement("p");
-          distanceText.classList.add("nearestStationDetails");
-          distanceText.textContent = ("Walking distance: " + currentStation.distanceText);
-          panel.appendChild(distanceText);
+          nearestStationTable += "<tr onclick='nearestStationInfo(" + currentStationNumber + ")'><th style='text-align: left;'>" + currentStationName + "</th></tr><tr><td>Walking distance: " + currentStationDistText + "</td></tr></tr><tr><td>Available bikes: " + currentStationBikes + "</td></tr><tr><td>Available stands: " + currentStationStands + "</td></tr>";
 
-          const available_bikes = document.createElement("p");
-          available_bikes.classList.add("nearestStationDetails");
-          available_bikes.textContent = ("Available bikes: " + currentStationDetails.getProperty("available_bikes"));
-          console.log(available_bikes);
-          panel.append(available_bikes);
-
-          const available_bike_stands = document.createElement("p");
-          available_bike_stands.classList.add("nearestStationDetails");
-          available_bike_stands.textContent = ("Available bike stands: " + currentStationDetails.getProperty("available_bike_stands"));
-          panel.append(available_bike_stands);
       }
+
+      nearestStationTable += "</table>";
+      document.getElementById("side_panel_default").innerHTML=nearestStationTable;
 }
 
 function filterMarkers(markerNumber) {
@@ -397,7 +427,6 @@ function filterColours(markerColour) {
             currentMarker.setVisible(true);
         }
     }
-
 }
 
 function showChartHolder(stationNumber) {
@@ -481,4 +510,27 @@ function graphHourlyInfo(stationNumber, stationName) {
             chart.draw(chart_data, options);
 
         });
+}
+
+// Reset chart/station info when location is entered, maybe not the most efficient approach
+function hideCharts(id, valueToSelect) {
+    let targetSelect = document.getElementById(id);
+    targetSelect.value = valueToSelect;
+    showChartHolder(valueToSelect);
+    for (let i = 0; i < markersArray.length; i++) {
+        let currentMarker = markersArray[i];
+        currentMarker.setVisible(true);
+        currentMarker.infowindow.close();
+    }
+}
+
+function nearestStationInfo(stationNumber) {
+    for (let i = 0; i < markersArray.length; i++) {
+        let currentMarker = markersArray[i];
+        if (currentMarker.number == stationNumber) {
+            currentMarker.infowindow.open(map, currentMarker);
+        } else {
+            currentMarker.infowindow.close(map, currentMarker);
+        }
+    }
 }

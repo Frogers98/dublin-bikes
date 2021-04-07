@@ -237,8 +237,9 @@ body {
         font-weight: bold;
     }
 
-    /*.nearestStationDetails {*/
-    /*}*/
+    #nearestStationTable th {
+        text-align: left;
+    }
 
 /*--------- 5. Link styling -------------*/
 
