@@ -309,7 +309,12 @@ a:active {
     clear: both;
 }
 
-
+/*  Adds a background spinner to all charts */
+.charts {
+    background-image: url('../static/ajax-loader.gif');
+    background-repeat:no-repeat;
+    background-position: center center;
+}
 /*  Wrapper - Tutorial 3 Solution*/
 .wrapper {
     margin: 0 auto;

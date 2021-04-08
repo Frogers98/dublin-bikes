@@ -480,6 +480,8 @@ function graphDailyInfo(stationNumber, stationName) {
     console.log("IN graphDailyINfo Station number is: " + stationNumber)
 
     console.log("Station info for station" + stationNumber)
+    // Clear the div so the backhround image of a loading spinner can be seen
+    document.getElementById("chart1").innerHTML = "";
     // Fetch the data
     fetch(`single_station_availability_stat_by_date/${stationNumber}`).then(
         response => {
@@ -517,6 +519,8 @@ function graphHourlyInfo(stationNumber, stationName) {
     console.log("IN graphHourlyINfo Station number is: " + stationNumber)
 
     console.log("Station info for station" + stationNumber)
+    // Clear the div so the backhround image of a loading spinner can be seen
+    document.getElementById("chart2").innerHTML = "";
     // Fetch the data
     fetch(`single_station_availability_stat_by_hourno/${stationNumber}`).then(
         response => {
