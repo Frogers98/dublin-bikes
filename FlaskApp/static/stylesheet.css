@@ -239,13 +239,27 @@ body {
         transform: translateY(-50%);
   }
 
-    #chart3 {
+  /*This is commented out as we are currently only using two charts*/
+  /*  #chart3 {*/
+  /*      position: absolute;*/
+  /*      bottom: 0;*/
+  /*      height: 33%;*/
+  /*      width: 100%;*/
+  /*      background-color: #ffffff;*/
+  /*}*/
+
+    /*The css for this is identical to the charts above*/
+    #predictionSelector {
         position: absolute;
         bottom: 0;
         height: 33%;
         width: 100%;
         background-color: #ffffff;
-  }
+    }
+
+    #predictionOutput {
+        position: absolute;
+    }
 
     /*#side_panel_default {*/
     /*    font-family: 'Quicksand', sans-serif;*/

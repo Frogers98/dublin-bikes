@@ -5,7 +5,7 @@
 <!-- BEGIN: Head Area: -->
 <head>
     <!--Load the google charts library-->
-     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
     <!--SEO-->
     <meta http-equiv="About" content="text/html; charset=utf-8">
@@ -16,7 +16,7 @@
 
     <!--Title-->
     <title>Dublin Bike About Page</title>
-    
+
     <!--CSS-->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheet.css') }}">
     <link href='http://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet' type='text/css'>
@@ -32,118 +32,127 @@
 <!-- END: Head Area -->
 
 
-
 <!--BEGIN: Body Area-->
 <body>
 
-    <!--BEGIN: Header DIV Area-->
-      <header id="header">
+<!--BEGIN: Header DIV Area-->
+<header id="header">
 
-      <!--BEGIN: Title Area-->
-      <div class="wrapper">
-      <!--END: Title Area-->
+    <!--BEGIN: Title Area-->
+    <div class="wrapper">
+        <!--END: Title Area-->
 
-      <!--BEGIN: Links Area-->
+        <!--BEGIN: Links Area-->
 
-          <nav id="navbarheader">
-              <a class="HeaderLink" href="/index">Stations</a>
-              <a class="HeaderLink" href="/about">About Disappster</a>
-              <div id="ColoursRadio">Filter markers by colour:
-                  <label for="allMarkers">
-                      <input type="radio" name="colourFilter"
-                             value="allColours"
-                             id="allRadio"
-                             onchange="filterColours(this.value)" checked>All colours</label>
-                  <label for="greenMarkers">
-                      <input type="radio" name="colourFilter"
-                             value="http://maps.google.com/mapfiles/ms/icons/green-dot.png"
-                             id="greenRadio"
-                             onchange="filterColours(this.value)">Green</label>
-                  <label for="yellowMarkers">
-                      <input type="radio" name="colourFilter"
-                             value="http://maps.google.com/mapfiles/ms/icons/yellow-dot.png" id="yellowRadio"
-                             onchange="filterColours(this.value)">Yellow</label>
-                  <label for="RedMarkers">
-                      <input type="radio" name="colourFilter"
-                             value="http://maps.google.com/mapfiles/ms/icons/red-dot.png"
-                             onchange="filterColours(this.value)">Red</label>
-              </div>
+        <nav id="navbarheader">
+            <a class="HeaderLink" href="/index">Stations</a>
+            <a class="HeaderLink" href="/about">About Disappster</a>
+            <div id="ColoursRadio">Filter markers by colour:
+                <label for="allMarkers">
+                    <input type="radio" name="colourFilter"
+                           value="allColours"
+                           id="allRadio"
+                           onchange="filterColours(this.value)" checked>All colours</label>
+                <label for="greenMarkers">
+                    <input type="radio" name="colourFilter"
+                           value="http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+                           id="greenRadio"
+                           onchange="filterColours(this.value)">Green</label>
+                <label for="yellowMarkers">
+                    <input type="radio" name="colourFilter"
+                           value="http://maps.google.com/mapfiles/ms/icons/yellow-dot.png" id="yellowRadio"
+                           onchange="filterColours(this.value)">Yellow</label>
+                <label for="RedMarkers">
+                    <input type="radio" name="colourFilter"
+                           value="http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+                           onchange="filterColours(this.value)">Red</label>
+            </div>
 
-          </nav>
+        </nav>
 
-      <!--END: Links Area-->
+        <!--END: Links Area-->
     </div>
 
 
-    </header>
-    <!--END: Header DIV Area-->
+</header>
+<!--END: Header DIV Area-->
 
-    <!--BEGIN: BODY Area-->
-    <div id="mainbody-area">
+<!--BEGIN: BODY Area-->
+<div id="mainbody-area">
 
-        <div id="directionsPanel"></div>
-        <div id="map"><!--MapGoesHere--></div>
-
-
+    <div id="directionsPanel"></div>
+    <div id="map"><!--MapGoesHere--></div>
 
 
     <!--BEGIN: SIDE PANEL Area-->
 
-        <div id="side-panel">
-                  <div id="headFilterArea">
-                      <label>Choose a station:</label>
-                      <select name="stationSelector" id="stationSelector" onchange="filterMarkers(this.value); showChartHolder(this.value)">
-                          <option value="showAll">Show All Stations</option>
-                          {% for station in station_data %}
-                          <option value="{{ station.number }}">{{ station.name }}</option>
-                          {% endfor %}
-                      </select>
+    <div id="side-panel">
+        <div id="headFilterArea">
+            <label>Choose a station:</label>
+            <select name="stationSelector" id="stationSelector"
+                    onchange="filterMarkers(this.value); showChartHolder(this.value)">
+                <option value="showAll">Show All Stations</option>
+                {% for station in station_data %}
+                <option value="{{ station.number }}">{{ station.name }}</option>
+                {% endfor %}
+            </select>
 
-                      <div id="locationSearch">
-                          <input type="text" id="enterLocation" placeholder="Enter a location" />
-                      </div>
+            <div id="locationSearch">
+                <input type="text" id="enterLocation" placeholder="Enter a location"/>
+            </div>
 
-                  </div>
-            <div id="side_panel_default">
-                <table id="nearestStationHolder"></table>
-            </div>
-            <div id="floating-panel"></div>
-            <div id="right-panel"></div>
-<!--            <div id="nearestStationHolder"></div>-->
-            <div id="chartHolder">
-                <div id="chart1" class="charts">Display Chart 1</div>
-                <div id="chart2" class="charts">Display Chart 2</div>
-                <div id="chart3">Display Chart 3</div>
-            </div>
         </div>
+        <div id="side_panel_default">
+            <table id="nearestStationHolder"></table>
+        </div>
+        <div id="floating-panel"></div>
+        <div id="right-panel"></div>
+        <!--            <div id="nearestStationHolder"></div>-->
+        <div id="chartHolder">
+            <div id="chart1" class="charts">Display Chart 1</div>
+            <div id="chart2" class="charts">Display Chart 2</div>
+            <!--                <div id="chart3">Display Chart 3</div>-->
+        </div>
+        <div id="predictionSelector">
+            <label for="getPredictions"> Choose a date/time to predict bike availability at this station:</label>
+
+            Date:<input id="predictionDate" type="date" name="prediction_date"/>
+            Time:<input id="predictionTime" type="time" name="prediction_time"/>
+            <button id="predictButton">Get Prediction</button>
+
+        </div>
+
+        <div id="predictionOutput"></div> <!--The output for the prediction will be displayed here-->
+    </div>
     <!--END:SIDE PANEL AREA-->
 
-    </div>
-    <!--END:BODY AREA-->
+</div>
+<!--END:BODY AREA-->
 
 
+<!--BEGIN: Footer Area-->
+<footer id="footer-area">
 
-    <!--BEGIN: Footer Area-->
-    <footer id="footer-area">
+    <p class='footer-font'>Created by <a class='footer-link'
+                                         href='https://disappster.atlassian.net/wiki/spaces/COMP30830/pages/164009/Team+Member+Contact+List'>Disappster</a>
+        - COMP30830</p>
+    <div class="clear"></div>
 
-      <p class='footer-font'>Created by <a class='footer-link' href='https://disappster.atlassian.net/wiki/spaces/COMP30830/pages/164009/Team+Member+Contact+List'>Disappster</a> - COMP30830</p>
-      <div class="clear"></div>
-
-    </footer>
-    <!--END: Footer Area-->
+</footer>
+<!--END: Footer Area-->
 
 
-  <!--BEGIN: GOOGLE ASYNC at END OF DOM ELEMENTS IN BODY-->
-     <script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDbU4W2J29Zz3Jz8gkcgImNj4YRwgLZCoQ&callback=initMap&libraries=places,geometry&v=weekly"
-          async>
-      // AR_API:
-      // https://maps.googleapis.com/maps/api/js?key=AIzaSyC9btECtY48D3C-qx36Lt0gmUQK9XlYkM0&callback=initMap&libraries=&v=weekly
-      // JS_API:
-      // https://maps.googleapis.com/maps/api/js?key=AIzaSyDbU4W2J29Zz3Jz8gkcgImNj4YRwgLZCoQ&callback=initMap&libraries=&v=weekly
-  </script>
-   <!--END: GOOGLE ASYNC at END OF DOM ELEMENTS IN BODY-->
-  
+<!--BEGIN: GOOGLE ASYNC at END OF DOM ELEMENTS IN BODY-->
+<script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDbU4W2J29Zz3Jz8gkcgImNj4YRwgLZCoQ&callback=initMap&libraries=places,geometry&v=weekly"
+        async>
+    // AR_API:
+    // https://maps.googleapis.com/maps/api/js?key=AIzaSyC9btECtY48D3C-qx36Lt0gmUQK9XlYkM0&callback=initMap&libraries=&v=weekly
+    // JS_API:
+    // https://maps.googleapis.com/maps/api/js?key=AIzaSyDbU4W2J29Zz3Jz8gkcgImNj4YRwgLZCoQ&callback=initMap&libraries=&v=weekly
+</script>
+<!--END: GOOGLE ASYNC at END OF DOM ELEMENTS IN BODY-->
+
 </body>
 
 </html>

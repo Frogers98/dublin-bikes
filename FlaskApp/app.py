@@ -33,23 +33,23 @@ app = Flask(__name__)
 #02.DEFINE DATABASE CONNECTION
 ####--------------------------------------
 
-# myhost=database_dictionary['endpoint']
-# myuser=database_dictionary['username']
-# mypassword=database_dictionary['password']
-# myport=database_dictionary['port']
-# mydb=database_dictionary['database']
+myhost=database_dictionary['endpoint']
+myuser=database_dictionary['username']
+mypassword=database_dictionary['password']
+myport=database_dictionary['port']
+mydb=database_dictionary['database']
 
-myhost=fr_database_dictionary['endpoint']
-myuser=fr_database_dictionary['username']
-mypassword=fr_database_dictionary['password']
-myport=fr_database_dictionary['port']
-mydb=fr_database_dictionary['database']
-
-myhost=js_database_dictionary['endpoint']
-myuser=js_database_dictionary['username']
-mypassword=js_database_dictionary['password']
-myport=js_database_dictionary['port']
-mydb=js_database_dictionary['database']
+# myhost=fr_database_dictionary['endpoint']
+# myuser=fr_database_dictionary['username']
+# mypassword=fr_database_dictionary['password']
+# myport=fr_database_dictionary['port']
+# mydb=fr_database_dictionary['database']
+#
+# myhost=js_database_dictionary['endpoint']
+# myuser=js_database_dictionary['username']
+# mypassword=js_database_dictionary['password']
+# myport=js_database_dictionary['port']
+# mydb=js_database_dictionary['database']
 
 
 ####--------------------------------------
@@ -248,6 +248,28 @@ def recentUpdate():
     avail_df=availability_recentUpdate(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
     return avail_df.to_json(orient='records')
 
+# This is a test route to test querying the selector
+@app.route("/test_model/<requested_time>/<no>")
+def getPrediction(requested_time, no):
+    """For testing this will just get the stations and return the name of that station"""
+    # the number gets passed by javascript as a string so we need to convert it to an int
+    no = int(no)
+    print("time requested for prediction was", requested_time)
+    print("*****")
+    print("station number selected was", no)
+    # Return the station info
+    station = station_availability_last_update_table_df(host=myhost, user=myuser, password=mypassword, port=myport,
+                                                        db=mydb)
+    # Turns that into a json
+    station_json = station.to_json(orient="records")
+    stationData = json.loads(station_json)
+    print("*****")
+    for station in stationData:
+        if station['number'] == no:
+            searched_station = station
+    print("Found station, it's", searched_station['name'])
+    result = json.dumps(searched_station['name'])
+    return result
 
 
 ###----RUN----####
