@@ -113,7 +113,9 @@ function initMap() {
     map.setOptions({styles: styleArray});
 
     directionsRenderer.setMap(map);
-    directionsRenderer.setPanel(document.getElementById("right-panel"));
+    // directionsRenderer.setPanel(document.getElementById("right-panel"));
+    directionsRenderer.setPanel(document.getElementById("directionsPanel"));
+
     // const directionsDisplay = document.getElementById("directionsPanel")
     // map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(directionsDisplay);
 
@@ -208,6 +210,7 @@ function initMap() {
                             marker.infowindow.close(map, marker);
                         });
 
+                        map.panTo(marker.position);
                         this.infowindow.open(map, marker);
                         showChartHolder(marker.number);
                         graphDailyInfo(marker.number, marker.name);
@@ -507,6 +510,9 @@ function showChartHolder(stationNumber) {
     if (stationNumber != "showAll") {
         document.getElementById('chartHolder').style.display = "block";
     } else {
+        // Zoom out and recentre
+        map.setZoom(13);
+        map.panTo({lat: 53.349804, lng: -6.260310});
         document.getElementById('chartHolder').style.display = "none";
     }
 }
@@ -541,7 +547,7 @@ function graphDailyInfo(stationNumber, stationName) {
             chart_data.addColumn('number', 'Available bikes');
             // Loop through each days average data that was retrieved from flask, add info from each day as a row in the google DataTable
             data.forEach(entry => {
-                chart_data.addRow([new Date(entry.created_date_date), entry.available_bikes])
+                chart_data.addRow([new Date(entry.created_date_date), parseInt(entry.available_bikes)])
             })
             // Specify where the chart will be drawn and draw it
             var chart = new google.visualization.ColumnChart(document.getElementById('chart1'));
@@ -580,7 +586,7 @@ function graphHourlyInfo(stationNumber, stationName) {
             chart_data.addColumn('number', 'Available bikes');
             // Loop through each days average data that was retrieved from flask, add info from each day as a row in the google DataTable
             data.forEach(entry => {
-                chart_data.addRow([entry.created_date_hourno, entry.available_bikes])
+                chart_data.addRow([entry.created_date_hourno, parseInt(entry.available_bikes)])
             })
             // Specify where the chart will be drawn and draw it
             var chart = new google.visualization.ColumnChart(document.getElementById('chart2'));
@@ -601,8 +607,8 @@ function hideCharts(id, valueToSelect) {
     }
 }
 
-function nearestStationInfo(stationNumber, stationName) {
-    // alert(stationName);
+function nearestStationInfo(stationNumber) {
+    directionsRenderer.set('directions', null);
     for (let i = 0; i < markersArray.length; i++) {
         let currentMarker = markersArray[i];
         if (currentMarker.number == stationNumber) {
@@ -614,20 +620,22 @@ function nearestStationInfo(stationNumber, stationName) {
 }
 
 function calculateAndDisplayRoute(originLocation, stationLocation) {
-    directionsService.route(
-        {
-            origin: originLocation,
-            destination: stationLocation,
-            travelMode: google.maps.TravelMode.WALKING,
-        },
-        (response, status) => {
-            if (status === "OK") {
-                directionsRenderer.setDirections(response);
-            } else {
-                window.alert("Directions request failed due to " + status);
-            }
-        }
-    );
+  directionsService.route(
+    {
+      origin: originLocation,
+      destination: stationLocation,
+      travelMode: google.maps.TravelMode.WALKING,
+    },
+    (response, status) => {
+      if (status === "OK") {
+          const directionsDisplay = document.getElementById("directionsPanel");
+          directionsDisplay.style.display = "block";
+          directionsRenderer.setDirections(response);
+      } else {
+        window.alert("Directions request failed due to " + status);
+      }
+    }
+  );
 }
 
 function getAvailabilityPrediction(stationNumber, requestedTime) {
