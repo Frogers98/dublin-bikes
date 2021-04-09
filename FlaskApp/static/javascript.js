@@ -531,8 +531,8 @@ function graphDailyInfo(stationNumber, stationName) {
             // Info for the graph such as title
             var options = {
                 title: `Average availability by day for ${stationName}`,
-                // curveType: 'function',
-                // legend: { position: 'bottom' }
+                vAxis: {title: "Number of bikes available"},
+                hAxis: {title: "Date"},
             };
             // Load the chart object from the api
             var chart_data = new google.visualization.DataTable();
@@ -570,8 +570,8 @@ function graphHourlyInfo(stationNumber, stationName) {
             // Info for the graph such as title
             var options = {
                 title: `Average availability by hour for ${stationName}`,
-                // curveType: 'function',
-                // legend: { position: 'bottom' }
+                vAxis: {title: "Number of bikes available"},
+                hAxis: {title: "Hour"},
             };
             // Load the chart object from the api
             var chart_data = new google.visualization.DataTable();

@@ -84,6 +84,10 @@ def home():
     stationData=json.loads(station_data_json)
     # This sorts the list station dictionaries by name so the selector will be ordered alphabetically
     stationDataSorted = sorted(stationData, key=lambda i: i['name'])
+
+    # Convert all station names to title case
+    for station in stationDataSorted:
+        station['name'] = station['name'].title()
     return render_template('index.html', station_data=stationDataSorted)
 
 @app.route("/stations")
@@ -95,6 +99,15 @@ def station():
     
     #Turns that into a json
     station_data_json=station.to_json(orient="records")
+
+    # Convert all names to title case
+    # First convert to a dictionary to make for easier looping
+    stationDataDict = json.loads(station_data_json)
+    for station in stationDataDict:
+        station['name'] = station['name'].title()
+
+    # Convert back to a json string before returning
+    station_data_json = json.dumps(stationDataDict)
 
     return station_data_json
 
