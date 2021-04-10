@@ -34,6 +34,7 @@ js_database_dictionary={
                         ,'port':'3306'   
 }
 
+
 database_schema={
                     '01_station':{
                               'address':'VARCHAR(256)'
@@ -54,21 +55,7 @@ database_schema={
                                 ,'last_update':'BIGINT'
                                 ,'created_date':'BIGINT'
                                 }
-
-                    ,'02_availability_train':{
-                                'number':'INTEGER'
-                                ,'available_bikes':'INTEGER'
-                                ,'available_bike_stands':'INTEGER'
-                                ,'last_update':'BIGINT'
-                                ,'created_date':'BIGINT'
-                                }
-,                   '02_availability_test':{
-                                'number':'INTEGER'
-                                ,'available_bikes':'INTEGER'
-                                ,'available_bike_stands':'INTEGER'
-                                ,'last_update':'BIGINT'
-                                ,'created_date':'BIGINT'
-                                }
+    
                     ,'01_weather':{
                                 'number': 'INT'
                                 ,'position_long':'REAL'
@@ -124,10 +111,73 @@ database_schema={
                                 ,'wind_degree':'INT'
                                 ,'clouds_all':'INT'
                                 ,'forecast_time_dt':'BIGINT'
-                                ,'forecast_time_txt':'VARCHAR(500)'
+                                ,'forecast_time_txt':'VARCHAR(200)'
                                 ,'created_date':'BIGINT'
                                 }
+    
+                    ,'02_station_avail_weather_train':{
+                                'number':'INTEGER'
+                                , 'weather_type_id':'INTEGER'
+                                , 'hour':'INTEGER'
+                                , 'dayofweek':'INTEGER'
+                                , 'dayofmonth':'INTEGER'
+                                , 'bool_weekend':'BOOLEAN'
+                                , 'bool_dayoff':'BOOLEAN'
+                                , 'bool_workhour':'BOOLEAN'
+                                , 'bool_commutehour':'BOOLEAN'
+                                , 'bool_night':'BOOLEAN'
+                                , 'available_bikes':'REAL' #average over everything
+                                , 'weather_temp_feels_like':'REAL' #average over everything
+                                , 'weather_temp':'REAL' #average over everything
+                               ,  'weather_humidity':'REAL' #average over everything
+                                , 'weather_air_pressure':'REAL' #average over everything
+                                , 'created_date':'BIGINT'
+                                }
+    
+,                   '02_station_avail_weather_test':{
+                                'number':'INTEGER'
+                                , 'weather_type_id':'INTEGER'
+                                , 'hour':'INTEGER'
+                                , 'dayofweek':'INTEGER'
+                                , 'dayofmonth':'INTEGER'
+                                , 'bool_weekend':'BOOLEAN'
+                                , 'bool_dayoff':'BOOLEAN'
+                                , 'bool_workhour':'BOOLEAN'
+                                , 'bool_commutehour':'BOOLEAN'
+                                , 'bool_night':'BOOLEAN'
+                                , 'available_bikes':'REAL' #average over everything
+                                , 'weather_temp_feels_like':'REAL' #average over everything
+                                , 'weather_temp':'REAL' #average over everything
+                                , 'weather_humidity':'REAL' #average over everything
+                                , 'weather_air_pressure':'REAL' #average over everything
+                                , 'created_date':'BIGINT'
+                                }
+    
+    ,                   '03_user_model_entry':{
+                                'prediction_id':'INTEGER'
+                                ,'number':'INTEGER'
+                                , 'weather_type_id':'INTEGER'
+                                , 'hour':'INTEGER'
+                                , 'dayofweek':'INTEGER'
+                                , 'dayofmonth':'INTEGER'
+                                , 'bool_weekend':'BOOLEAN'
+                                , 'bool_dayoff':'BOOLEAN'
+                                , 'bool_workhour':'BOOLEAN'
+                                , 'bool_commutehour':'BOOLEAN'
+                                , 'bool_night':'BOOLEAN'
+                                , 'available_bikes':'REAL' #average over everything
+                                , 'weather_temp_feels_like':'REAL' #average over everything
+                                , 'weather_temp':'REAL' #average over everything
+                                , 'weather_humidity':'REAL' #average over everything
+                                , 'weather_air_pressure':'REAL' #average over everything
+                                , 'user_date':'BIGINT'        
+                                , 'created_date':'BIGINT'
+                                , 'predicted_date':'BIGINT'
+                                , 'model_type':'VARCHAR(100)'
+                                , 'bool_correct_prediction':'BOOLEAN'
+                                }
                 }
+
 
 services_dictionary={
                 'Dublin Bikes':
@@ -153,6 +203,18 @@ services_dictionary={
 
                         ,'Endpoint':{
                                 'weather_at_coord':'http://api.openweathermap.org/data/2.5/weather' #?lat={}&lon={}&appid={}
+                                    }
+                        ,'API Key':'fa4a1ef5fe110a5b66dbe8f58890b6f1'
+                    },
+
+                'OpenWeatherMapForecast':
+                    {
+                        'Service Provider':'OpenWeatherMap'
+                        ,'API Reason':'Weather Data'
+                        ,'Security':'secret'
+
+                        ,'Endpoint':{
+                                'weather_at_coord':'http://api.openweathermap.org/data/2.5/forecast' #?lat={}&lon={}&appid={}
                                     }
                         ,'API Key':'fa4a1ef5fe110a5b66dbe8f58890b6f1'
                     },
