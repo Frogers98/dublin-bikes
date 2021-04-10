@@ -2307,7 +2307,7 @@ def predict_from_station_time(weather_data,station_number,timestamp):
  'weather_humidity',
  'weather_air_pressure']]
 
-    #Had to swap to linear model as XGBoost is not loading due to save error!?
+    #Had to swap to linear model as XGBoost is not loading due to save
     loaded_model = pickle.load(open('./predictive_models/lin_model_station_{}.pickle'.format(station_number), 'rb'))
     print(staging_df.columns)
     result = loaded_model.predict(staging_df)

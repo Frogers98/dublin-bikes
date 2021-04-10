@@ -276,7 +276,7 @@ def getPrediction(requested_time, no):
     print()
     prediction_data=predict_from_station_time(weather_data=weather_data,station_number=no,timestamp=requested_datetime)
     # Turns that into a json
-    print(prediction_data[0])
+    print(int(prediction_data[0]))
     
     result = json.dumps(prediction_data[0])
     return result
