@@ -1632,6 +1632,13 @@ def generate_models(raw_df,host,user,password,port,db, plot_comp=True,plot_tree=
     engine_l=connect_db_engine(host,user,password,port,db)
     engine=engine_l[1]
 
+    try:
+        #Try Clear the DB
+        engine.execute("""DELETE FROM 02_station_avail_weather_train WHERE 1=1""")
+        engine.execute("""DELETE FROM 02_station_avail_weather_test WHERE 1=1""")
+    except:
+        print('Cannot Remove')
+
     #HardCoded inputs - NOT A GOOD PRACTICE
     
     #Update time column
@@ -1789,7 +1796,8 @@ def generate_models(raw_df,host,user,password,port,db, plot_comp=True,plot_tree=
     
     
     station_dataframe_model_list={}
-    
+    datetime_now=dt.datetime.now()
+    created_date=dt.datetime.timestamp(datetime_now)
 
     #For each station in the list
     for station_number in staging_df['station_number'].sort_values().unique():
@@ -1844,10 +1852,29 @@ def generate_models(raw_df,host,user,password,port,db, plot_comp=True,plot_tree=
                     .dropna()
                 )
             
+
+            #This won't work - It needs to be a function 
             try:
-                station_train_df.to_sql(name='02_station_avail_weather_train', con=engine, if_exists='replace', index=False)
-                station_test_df.to_sql(name='02_station_avail_weather_test', con=engine, if_exists='replace', index=False)
+                #Don't touch the actual data
+                temp_train_df=station_train_df.copy(deep=True)
+                temp_test_df=station_test_df.copy(deep=True)
+
+                #Add on created column
+                temp_train_df['created_date']=created_date
+                temp_test_df['created_date']=created_date
+
+                #Station Number
+                temp_train_df['number']=station_number
+                temp_test_df['number']=station_number
+
+                #Test/Train to DB
+                temp_train_df.to_sql(name='02_station_avail_weather_train', con=engine, if_exists='append', index=False)
+                temp_test_df.to_sql(name='02_station_avail_weather_test', con=engine, if_exists='append', index=False)
             
+                #Remove these from memory
+                del temp_train_df
+                del temp_test_df
+
             except Exception as e:
                 print("Exception posting testing and training data: {}".format(e))
                 
@@ -1890,3 +1917,4 @@ def wrap_generate_models(host,user,password,port,db, plot_comp=False,plot_tree=F
     model_data=generate_models(raw_df,host,user,password,port,db,plot_comp=False,plot_tree=False)
 
     return model_data
+
