@@ -1926,6 +1926,73 @@ def wrap_generate_models(host,user,password,port,db, plot_comp=False,plot_tree=F
 #09 Forecast Functions - Previously separate file
 ###-------------------------------------
 
+def get_forecast_for_time(host,user,password,port,db,station_no,timestamp):
+    """This function pulls the station, weather, availability data.
+    
+    Note: This is very time intensive. Use this to pass to other summary functions"""
+    
+    print("Inside pull_station_weather_availability_data(host,user,password,port,db)")
+    
+    #Possible Errors
+    error_dictionary={0:'No Error'
+                     ,1:'The database failed to connect'
+                     ,2:"The query is not a valid string"
+                     ,3: "The returned database is empty"
+                      ,999: 'Uncaught exception'
+                     }
+    
+    #Set up a default value to return
+    data_df=pd.DataFrame()
+    
+    error_code=0
+    
+    #Configure the SQL statement
+    sql_statement=SQL_select_forecast_where_station_and_time.format(station_no,timestamp)
+    
+    time_statement="The retrieval from the database took: {} (ns)"
+    
+    #Begin try
+    try:
+        engine_l=connect_db_engine(host,user,password,port,db)
+        engine=engine_l[1]
+        
+        #No error connecting to engine
+        if engine_l[0]==0:
+            
+            #String
+            if type(sql_statement)==str and len(sql_statement)>0:
+                
+                #Begin counter
+                start_time=time.perf_counter_ns()
+                data_df=pd.read_sql(sql_statement,engine)
+                end_time=time.perf_counter_ns()
+                engine.dispose()
+                
+                #Performance measurement
+                print(time_statement.format(end_time-start_time))
+                
+                #Dataframe is empty
+                if len(data_df)==0:
+                    error_code=3
+                    error_message=error_dictionary[error_code]
+                    
+            #Invalid SQL Statement
+            else:
+                error_code=2
+                error_message=error_dictionary[error_code]         
+        
+        else:
+            error_code=1
+            error_message=error_dictionary[error_code]
+
+    except Exception as e:
+        error_code=999
+        print("Unexpected failure: {}".format(e))
+        
+    return data_df
+
+
+
 
 def getWeatherForecast(latitude, longitude):
     """Function to return the weather forecast for certain co-ordinates"""
@@ -2101,3 +2168,127 @@ def forecast_per_station(host,user,password,port,db):
     print("Forecasts inserted for all stations!")
     print("**************")
     return
+
+def predict_from_station_time(weather_data,station_number,timestamp):
+    """A function to predict from a station number and timestamp"""
+
+    #Columns from Weather Query
+    weather_columns=['number'
+                    ,'weather_id'
+                    ,'main'
+                    ,'description'
+                    ,'temp'
+                    ,'feels_like'
+                    ,'temp_min'
+                    ,'temp_max'
+                    ,'pressure'
+                    ,'humidity'
+                    ,'visibility'
+                    ,'wind_speed'
+                    ,'wind_degree'
+                    ,'clouds_all'
+                    ,'forecast_time_dt'
+                    ,'weather_time']
+
+    prediction_datetime=pd.to_datetime(timestamp)
+
+
+
+    cleansed_column_mapping={
+                            'number': ['station_number']
+                         ,  'weather_id':['weather_type_id']
+                         , 'main':['weather_type_main']
+                         , 'description':['weather_type_detail']
+                         , 'temp':['weather_temp']
+                         , 'feels_like':['weather_temp_feels_like']
+                         , 'temp_min':['weather_temp_min']
+                         , 'temp_max':['weather_temp_max']
+                         , 'pressure':['weather_air_pressure']
+                         , 'humidity':['weather_humidity']
+                         , 'visibility':['weather_visibility']
+                         , 'wind_speed':['weather_wind_speed']
+                         , 'wind_degree':['weather_wind_direction']
+                         , 'clouds_all':['clouds']
+                         , 'forecast_time_dt':['weather_datetime']
+                         ,'weather_time':['weather_time']
+                         }
+    
+    update_time_column='entry_create_date'
+
+    #Features - Initial
+    relevant_feature_columns={
+                    'feature':[
+                                'station_number'
+                               ,update_time_column
+                               ,'weather_type_id'
+                               ,'weather_temp'
+                               ,'weather_temp_feels_like'
+                               ,'weather_air_pressure'
+                               ,'weather_humidity'
+                              ]
+                    
+                            }
+    
+    
+    weather_data[update_time_column]=pd.to_datetime(prediction_datetime)
+
+    #Staging Dataframe
+    staging_df=weather_data.copy(deep=True)
+    
+    
+    ###------
+    #Rename Columns to Verbose - This should be functionised
+    column_mapping={}
+    
+    for key,value in cleansed_column_mapping.items():
+        for v in value:
+            column_mapping[key] =  v
+
+    
+    staging_df=staging_df.rename(columns=column_mapping)
+    
+    #Column Renaming complete
+    ###------
+    
+    
+    
+    ###------
+    #Drop irrelevant features - This should be functionised
+    keep_columns=[]
+
+    for value in relevant_feature_columns.values():
+        keep_columns+=value
+
+    keep_columns=list(set(keep_columns))
+    ###------
+    
+    
+    ###------
+    #Object column conversion to category for xgboost
+    for object_column in ['station_number']:#,'weather_type_id']:
+        
+        #Check if in column list
+        if object_column in staging_df.columns:
+            
+            #Change to category
+            staging_df[object_column]=staging_df[object_column].astype('category')
+            
+        #Not in column list
+        else:
+            print("Missing {}".format(object_column))
+
+    ###------
+    staging_df=staging_df[keep_columns]
+    
+    #Add on day, hour, week
+    time_feature_list=add_time_features(df=staging_df, date_time_column=update_time_column)
+    
+    #Staging Data with time features added
+    staging_df=time_feature_list[0]
+
+    staging_df=staging_df.drop(update_time_column,axis=1)
+
+    loaded_model = pickle.load(open('./predictive_models/xg_model_station_{}.pickle'.format(station_number), 'rb'))
+    result = loaded_model.predict(staging_df)
+    
+    return result

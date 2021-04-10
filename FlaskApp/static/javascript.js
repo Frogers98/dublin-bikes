@@ -224,7 +224,7 @@ function initMap() {
                         predictionButton.addEventListener("click", function () {
                             let predictionDate = document.getElementById("predictionDate").value;
                             let predictionTime = document.getElementById("predictionTime").value;
-                            let prediction_request = new Date(predictionDate + " " + predictionTime);
+                            let prediction_request = new String(predictionDate + " " + predictionTime);
                             // console.log(prediction_request);
                             // alert("This worked!, selected station was " + marker.name);
 

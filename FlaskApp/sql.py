@@ -782,14 +782,13 @@ SQL_select_forecast_where_station_and_time="""
             ,fore.clouds_all
             ,fore.forecast_time_dt
             ,fore.forecast_time_txt
-            ,fore.created_date'
+            ,fore.created_date
         FROM 
             ({}) fore
         WHERE
-            fore.{}=
-            """.format(SQL_select_forecast,'number',)+"""'{}'"""+"""
+            fore.{}=""".format(SQL_select_forecast,'number',)+"""'{}'"""+"""
             AND
-            fore.forecast_time_dt<=""" + """'{}'"""+"""
+            fore.forecast_time_dt<=""" + """UNIX_TIMESTAMP('{}:00')"""+"""
         ) x
 
         GROUP BY
@@ -807,8 +806,7 @@ SQL_select_forecast_where_station_and_time="""
             ,x.wind_speed
             ,x.wind_degree
             ,x.clouds_all
-            ,x.forecast_time_dt
-    ) y"""
+            ,x.forecast_time_dt"""
 
 SQL_select_limit_availability= """SELECT 
                                         * 

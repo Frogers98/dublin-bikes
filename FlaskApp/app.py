@@ -16,6 +16,8 @@
 #     FLASK
 ######--------END
 
+import pandas as pd
+import datetime as dt
 from flask import Flask, render_template
 from FlaskApp.methods import *
 from FlaskApp.data_dictionary import database_dictionary, fr_database_dictionary, js_database_dictionary
@@ -33,11 +35,11 @@ app = Flask(__name__)
 #02.DEFINE DATABASE CONNECTION
 ####--------------------------------------
 
-# myhost=database_dictionary['endpoint']
-# myuser=database_dictionary['username']
-# mypassword=database_dictionary['password']
-# myport=database_dictionary['port']
-# mydb=database_dictionary['database']
+myhost=database_dictionary['endpoint']
+myuser=database_dictionary['username']
+mypassword=database_dictionary['password']
+myport=database_dictionary['port']
+mydb=database_dictionary['database']
 
 # myhost=fr_database_dictionary['endpoint']
 # myuser=fr_database_dictionary['username']
@@ -255,11 +257,6 @@ def metric_type_average_avail_for_station(metric_type,station_no):
     return result_json
 
 
-@app.route("/availability_v2")
-def recentUpdate():
-    """Recent Update"""
-    avail_df=availability_recentUpdate(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
-    return avail_df.to_json(orient='records')
 
 # This is a test route to test querying the selector
 @app.route("/test_model/<requested_time>/<no>")
@@ -267,21 +264,20 @@ def getPrediction(requested_time, no):
     """For testing this will just get the stations and return the name of that station"""
     # the number gets passed by javascript as a string so we need to convert it to an int
     no = int(no)
+
+    requested_datetime=pd.to_datetime(requested_time)
+    requested_datetime=dt.datetime.timestamp(requested_datetime)
     print("time requested for prediction was", requested_time)
     print("*****")
     print("station number selected was", no)
+
     # Return the station info
-    station = station_availability_last_update_table_df(host=myhost, user=myuser, password=mypassword, port=myport,
-                                                        db=mydb)
+    weather_data=get_forecast_for_time(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb,station_no=no,timestamp=requested_time)
+    predict_from_station_time(weather_data=weather_data,station_number=no,timestamp=requested_datetime)
     # Turns that into a json
     station_json = station.to_json(orient="records")
-    stationData = json.loads(station_json)
-    print("*****")
-    for station in stationData:
-        if station['number'] == no:
-            searched_station = station
-    print("Found station, it's", searched_station['name'])
-    result = json.dumps(searched_station['name'])
+    
+    result = json.dumps('5')
     return result
 
 
