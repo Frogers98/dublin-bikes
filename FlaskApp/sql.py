@@ -743,25 +743,7 @@ SQL_select_forecast="""
 
 #Populate the Time and Date
 SQL_select_forecast_where_station_and_time="""
-    SELECT TOP 1
-    y.number
-        ,y.weather_id
-        ,y.main
-        ,y.description
-        ,y.temp
-        ,y.feels_like
-        ,y.temp_min
-        ,y.temp_max
-        ,y.pressure
-        ,y.humidity
-        ,y.visibility
-        ,y.wind_speed
-        ,y.wind_degree
-        ,y.clouds_all
-        ,y.forecast_time_dt
-    FROM
-
-    (SELECT
+  SELECT
         x.number
         ,x.weather_id
         ,x.main
@@ -777,7 +759,6 @@ SQL_select_forecast_where_station_and_time="""
         ,x.wind_degree
         ,x.clouds_all
         ,x.forecast_time_dt
-        ,MAX(forecast_time_dt) as weather_time
     FROM
         (SELECT
             fore.number
@@ -809,22 +790,11 @@ SQL_select_forecast_where_station_and_time="""
             fore.forecast_time_dt<=""" + """CAST('{}:00' AS DATETIME)"""+"""
         ) x
 
-        GROUP BY
-            x.number
-            ,x.weather_id
-            ,x.main
-            ,x.description
-            ,x.temp
-            ,x.feels_like
-            ,x.temp_min
-            ,x.temp_max
-            ,x.pressure
-            ,x.humidity
-            ,x.visibility
-            ,x.wind_speed
-            ,x.wind_degree
-            ,x.clouds_all
-            ,x.forecast_time_dt ) y WHERE weather_time=forecast_time_dt"""
+    ORDER BY
+		forecast_time_dt
+    DESC
+        
+	LIMIT 1;"""
 
 SQL_select_limit_availability= """SELECT 
                                         * 

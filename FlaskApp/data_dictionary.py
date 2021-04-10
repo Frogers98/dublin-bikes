@@ -9,7 +9,7 @@
 ##------------------APP---------------##
 
 
-fr_database_dictionary={
+ar_database_dictionary={
                         'username':'adamryan'
                         ,'password':'adam.ryan1'
                         ,'database':'dbbikes'

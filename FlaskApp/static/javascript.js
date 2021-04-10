@@ -669,7 +669,7 @@ function getAvailabilityPrediction(stationNumber, requestedDate, requestedTime) 
 
     let prediction_request = new String(requestedDate + " " + requestedTime);
 
-    fetch(`/test_model/${requestedTime}/${stationNumber}`).then(
+    fetch(`/test_model/${prediction_request}/${stationNumber}`).then(
         response => {
             return response.json();
         }

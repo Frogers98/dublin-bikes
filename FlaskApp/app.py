@@ -20,7 +20,7 @@ import pandas as pd
 import datetime as dt
 from flask import Flask, render_template
 from FlaskApp.methods import *
-from FlaskApp.data_dictionary import database_dictionary, fr_database_dictionary, js_database_dictionary
+from FlaskApp.data_dictionary import database_dictionary, ar_database_dictionary, js_database_dictionary
 
 
 
@@ -35,11 +35,11 @@ app = Flask(__name__)
 #02.DEFINE DATABASE CONNECTION
 ####--------------------------------------
 
-myhost=database_dictionary['endpoint']
-myuser=database_dictionary['username']
-mypassword=database_dictionary['password']
-myport=database_dictionary['port']
-mydb=database_dictionary['database']
+myhost=ar_database_dictionary['endpoint']
+myuser=ar_database_dictionary['username']
+mypassword=ar_database_dictionary['password']
+myport=ar_database_dictionary['port']
+mydb=ar_database_dictionary['database']
 
 # myhost=fr_database_dictionary['endpoint']
 # myuser=fr_database_dictionary['username']
@@ -264,7 +264,7 @@ def getPrediction(requested_time, no):
     """For testing this will just get the stations and return the name of that station"""
     # the number gets passed by javascript as a string so we need to convert it to an int
     no = int(no)
-
+    print(requested_time)
     requested_datetime=pd.to_datetime(requested_time)
     requested_datetime=dt.datetime.timestamp(requested_datetime)
     print("time requested for prediction was", requested_time)
@@ -273,11 +273,12 @@ def getPrediction(requested_time, no):
 
     # Return the station info
     weather_data=get_forecast_for_time(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb,station_no=no,timestamp=requested_time)
-    predict_from_station_time(weather_data=weather_data,station_number=no,timestamp=requested_datetime)
+    print()
+    prediction_data=predict_from_station_time(weather_data=weather_data,station_number=no,timestamp=requested_datetime)
     # Turns that into a json
-    station_json = station.to_json(orient="records")
+    print(prediction_data[0])
     
-    result = json.dumps('5')
+    result = json.dumps(prediction_data[0])
     return result
 
 

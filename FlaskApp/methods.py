@@ -1388,13 +1388,13 @@ def add_time_features(df, date_time_column):
     """
     Various time features for analytics
     """
-    
+    print(df)
     #Features to keep
     #df['timestamp']=(df[date_time_column].astype(int)/10**9).astype(int)
     df['hour'] = df[date_time_column].dt.hour
     df['dayofweek'] = df[date_time_column].dt.dayofweek
     df['dayofmonth'] = df[date_time_column].dt.day
-    df['dayofyear'] = df[date_time_column].dt.day
+    df['dayofyear'] = df[date_time_column].dt.dayofyear
     
     df['bool_weekend']=np.where(df['dayofweek']>4, True, False)
     #df['bool_level5']=np.where(df['dayofyear']<pd.to_datetime('2021-05-04').dt.day, True, False)
@@ -1403,9 +1403,9 @@ def add_time_features(df, date_time_column):
     df['bool_dayoff']=False
     
     df.loc[(df['dayofweek']>4) |
-       (df['dayofyear']==pd.to_datetime('2021-03-17').day) | 
-       (df['dayofyear']==pd.to_datetime('2021-04-05').day) | 
-        (df['dayofyear']==pd.to_datetime('2021-05-04').day),
+       (df['dayofyear']==pd.to_datetime('2021-03-17').dayofyear) | 
+       (df['dayofyear']==pd.to_datetime('2021-04-05').dayofyear) | 
+        (df['dayofyear']==pd.to_datetime('2021-05-04').dayofyear),
        'bool_dayoff'] = True
     
     #Work Hours 9am to 5pm
@@ -1414,9 +1414,9 @@ def add_time_features(df, date_time_column):
             (df['hour']<16),'bool_workhour']=False
     
     df.loc[(df['dayofweek']>4) |
-       ((df['dayofyear']==pd.to_datetime('2021-03-17').day) |
-       (df['dayofyear']==pd.to_datetime('2021-04-05').day) |
-        (df['dayofyear']==pd.to_datetime('2021-05-04').day)),
+       ((df['dayofyear']==pd.to_datetime('2021-03-17').dayofyear) |
+       (df['dayofyear']==pd.to_datetime('2021-04-05').dayofyear) |
+        (df['dayofyear']==pd.to_datetime('2021-05-04').dayofyear)),
        'bool_dayoff'] = True   
     
     df['bool_commutehour']=False
@@ -1435,6 +1435,8 @@ def add_time_features(df, date_time_column):
     #df['minute'] = df[date_time_column].dt.minute
     #df['weekofyear'] = df[date_time_column].dt.weekofyear
     #df=d#f.drop(date_time_column, axis=1)
+
+    df=df.drop('dayofyear',axis=1)
     
     return [df,['hour','dayofweek','dayofmonth','bool_weekend','bool_dayoff','bool_workhour','bool_commutehour','bool_night']]
 
@@ -2213,7 +2215,7 @@ def predict_from_station_time(weather_data,station_number,timestamp):
                          ,'weather_time':['weather_time']
                          }
     
-    update_time_column='entry_create_date'
+    update_time_column='weather_datetime'
 
     #Features - Initial
     relevant_feature_columns={
@@ -2228,9 +2230,6 @@ def predict_from_station_time(weather_data,station_number,timestamp):
                               ]
                     
                             }
-    
-    
-    weather_data[update_time_column]=pd.to_datetime(prediction_datetime)
 
     #Staging Dataframe
     staging_df=weather_data.copy(deep=True)
@@ -2246,6 +2245,7 @@ def predict_from_station_time(weather_data,station_number,timestamp):
 
     
     staging_df=staging_df.rename(columns=column_mapping)
+
     
     #Column Renaming complete
     ###------
@@ -2279,6 +2279,8 @@ def predict_from_station_time(weather_data,station_number,timestamp):
 
     ###------
     staging_df=staging_df[keep_columns]
+
+    print(staging_df.describe())
     
     #Add on day, hour, week
     time_feature_list=add_time_features(df=staging_df, date_time_column=update_time_column)
@@ -2287,8 +2289,27 @@ def predict_from_station_time(weather_data,station_number,timestamp):
     staging_df=time_feature_list[0]
 
     staging_df=staging_df.drop(update_time_column,axis=1)
+    staging_df=staging_df.drop('station_number',axis=1)
 
-    loaded_model = pickle.load(open('./predictive_models/xg_model_station_{}.pickle'.format(station_number), 'rb'))
+    print(staging_df.dtypes)
+
+    staging_df=staging_df[['weather_type_id',
+ 'hour',
+ 'dayofweek',
+ 'dayofmonth',
+ 'bool_weekend',
+ 'bool_dayoff',
+ 'bool_workhour',
+ 'bool_commutehour',
+ 'bool_night',
+ 'weather_temp_feels_like',
+ 'weather_temp',
+ 'weather_humidity',
+ 'weather_air_pressure']]
+
+    #Had to swap to linear model as XGBoost is not loading due to save error!?
+    loaded_model = pickle.load(open('./predictive_models/lin_model_station_{}.pickle'.format(station_number), 'rb'))
+    print(staging_df.columns)
     result = loaded_model.predict(staging_df)
     
     return result
