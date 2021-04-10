@@ -1918,3 +1918,186 @@ def wrap_generate_models(host,user,password,port,db, plot_comp=False,plot_tree=F
 
     return model_data
 
+
+
+
+
+###-------------------------------------
+#09 Forecast Functions - Previously separate file
+###-------------------------------------
+
+
+def getWeatherForecast(latitude, longitude):
+    """Function to return the weather forecast for certain co-ordinates"""
+    weather_key = services_dictionary['OpenWeatherMapForecast']['API Key']
+    endpoint=services_dictionary['OpenWeatherMapForecast']['Endpoint']['weather_at_coord']
+    r = requests.get(endpoint, params={"APPID": weather_key, "lat": latitude, "lon": longitude})
+    return r.json()
+
+
+
+def store_weather_forecast(weather_json,number,time_added,host,user,password,port,db):
+    """
+    Store the Weather Data into the database
+    Removed base, timezone, avail_update_dt, datetime, id_var, name, cod and all 'sys' entries when compared to scraper for current weather
+    Added forecast_time_dt and forecast_time_txt
+    """
+    
+    engine_l=connect_db_engine(host,user,password,port,db)
+    engine=engine_l[1]
+    
+    print('Inside store_weather_forecast')
+    station_number=number
+    
+    print(weather_json)
+    
+    position_long=weather_json['city']['coord']['lon']
+    position_lat=weather_json['city']['coord']['lat']
+
+    for forecast_time in weather_json['list']:
+        # Loops through every forecast time at three hour intervals for the next 5 days for the current coordinates and saves it in the database
+        forecast_time_dt = forecast_time['dt']
+        forecast_time_txt = forecast_time['dt_txt']
+        weather_id=forecast_time['weather'][0]['id']
+        main=forecast_time['weather'][0]['main']
+        description=forecast_time['weather'][0]['description']
+        icon=forecast_time['weather'][0]['icon']
+        icon_url='http://openweathermap.org/img/wn/{}@2x.png'.format(icon)
+
+        temp=forecast_time['main']['temp']
+        feels_like=forecast_time['main']['feels_like']
+        temp_min=forecast_time['main']['temp_min']
+        temp_max=forecast_time['main']['temp_max']
+        pressure=forecast_time['main']['pressure']
+        humidity=forecast_time['main']['humidity']
+        visibility=forecast_time['visibility']
+
+        wind_speed=forecast_time['wind']['speed']
+        wind_degree=forecast_time['wind']['deg']
+
+        clouds_all=forecast_time['clouds']['all']
+
+        created_date=time_added
+
+        weather_insert='''INSERT INTO 01_forecast
+    
+                                    (    number
+                                        ,position_long
+                                        ,position_lat
+    
+                                        ,weather_id
+                                        ,main
+                                        ,description
+                                        ,icon
+                                        ,icon_url
+    
+                                        ,temp
+                                        ,feels_like
+                                        ,temp_min
+                                        ,temp_max
+                                        ,pressure
+                                        ,humidity
+                                        ,visibility
+    
+                                        ,wind_speed
+                                        ,wind_degree
+    
+                                        ,clouds_all
+    
+                                        ,forecast_time_dt
+                                        ,forecast_time_txt
+    
+                                        ,created_date)
+    
+                                VALUES
+                                    (%s
+                                      ,%s
+                                      ,%s
+    
+                                      ,%s
+                                      ,%s
+                                      ,%s
+                                      ,%s
+                                      ,%s
+    
+                                      ,%s
+                                      ,%s
+                                      ,%s
+                                      ,%s
+                                      ,%s
+                                      ,%s
+
+    
+                                      ,%s
+                                      ,%s
+    
+                                      ,%s
+    
+                                      ,%s
+                                      ,%s
+    
+                                      ,%s
+                                      ,%s)
+                                        '''
+
+        weather_values=(station_number
+                        ,position_long
+                        ,position_lat
+                        ,weather_id
+                        ,main
+                        ,description
+                        ,icon
+                        ,icon_url
+                        ,temp
+                        ,feels_like
+                        ,temp_min
+                        ,temp_max
+                        ,pressure
+                        ,humidity
+                        ,visibility
+                        ,wind_speed
+                        ,wind_degree
+                        ,clouds_all
+                        ,forecast_time_dt
+                        ,forecast_time_txt
+                        ,created_date)
+
+        engine.execute(weather_insert,weather_values)
+        
+    engine.dispose()
+
+    return
+
+
+
+def forecast_per_station(host,user,password,port,db):
+    """Getting the forecast data for each station, leve"""
+
+    setup_database(host,user,password,port,db)
+    
+    station_data = station_table_df(host,user,password,port,db)
+    
+    station_data=json.loads(station_data.to_json(orient='records'))
+    print(station_data)
+    
+    # Set up the forecast table if it hasn't been done already
+    #Get the current date for when this function is called to be able to group all entries together
+    datetime_now = dt.datetime.now()
+    created_date = dt.datetime.timestamp(datetime_now)
+
+    # Loop through each bike station to get their coordinates and make a forecast call on those coordinates
+    for station in station_data:
+        position_lat = station['position_lat']
+        position_lng = station['position_long']
+        number = station['number']
+        print("**************")
+        print(f"Current station is station number {number} ")
+        print("**************")
+        # Get the forecast for the co-ordinates of the current station in the loop
+        weather_json = getWeatherForecast(latitude=position_lat, longitude=position_lng)
+        # Store the forecast for this station in the database
+        store_weather_forecast(weather_json, number, created_date,host,user,password,port,db)
+    print("**************")
+    print("Forecasts inserted for all stations!")
+    print("**************")
+    return
