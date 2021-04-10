@@ -238,6 +238,7 @@ function initMap() {
                         // First we need to remove the initial onclick function we gave the button which was to display an error message
                         // if clicked before selecting a station
                         predictionButton.onclick = null;
+                        // Now we can add the new event listener to run a different function once the button is clicked
                         predictionButton.addEventListener("click", function () {
                             let predictionDate = document.getElementById("predictionDate").value;
                             let predictionTime = document.getElementById("predictionTime").value;
