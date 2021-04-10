@@ -33,7 +33,7 @@
 
 
 <!--BEGIN: Body Area-->
-<body>
+<body onload="displayDate()">
 
 <!--BEGIN: Header DIV Area-->
 <header id="header">
@@ -86,50 +86,71 @@
 
     <!--BEGIN: SIDE PANEL Area-->
 
-    <div id="side-panel">
-        <div id="headFilterArea">
-            <label>Choose a station:</label>
-            <select name="stationSelector" id="stationSelector"
-                    onchange="filterMarkers(this.value); showChartHolder(this.value)">
-                <option value="showAll">Show All Stations</option>
-                {% for station in station_data %}
-                <option value="{{ station.number }}">{{ station.name }}</option>
-                {% endfor %}
-            </select>
+    <div id="sidePanel">
 
+        <div id="sidePanelNav">
+            <button class="tablinks" onclick="openTab('sidePanelDefault')">Welcome</button>
+            <button class="tablinks" onclick="openTab('nearestStationDiv')">Nearest Stations</button>
+            <button class="tablinks" onclick="openTab('availabilityDiv')">Availability</button>
+
+        </div>
+
+        <div id="sidePanelDefault">
+
+                <h2 id="displayDay"></h2>
+                <h3 id="displayDate"></h3>
+
+        </div>
+
+        <div id="nearestStationDiv" class="displayNone">
+
+            <p>Enter your location to find stations nearby</p>
             <div id="locationSearch">
-                <input type="text" id="enterLocation" placeholder="Enter a location"/>
+                <input type="text" id="enterLocation" placeholder="Search"/>
+            </div>
+            <table id="nearestStationHolder"></table>
+
+        </div>
+
+        <div id="availabilityDiv" class="displayNone">
+
+            <div id="headFilterArea">
+                <label>Choose a station to view availability</label>
+                <select name="stationSelector" id="stationSelector"
+                        onchange="filterMarkers(this.value); showChartHolder(this.value)">
+                    <option value="showAll">Show All Stations</option>
+                    {% for station in station_data %}
+                    <option value="{{ station.number }}">{{ station.name }}</option>
+                    {% endfor %}
+                </select>
             </div>
 
-        </div>
-        <div id="side_panel_default">
-            <table id="nearestStationHolder"></table>
-        </div>
-        <div id="floating-panel"></div>
-        <div id="right-panel"></div>
-        <!--            <div id="nearestStationHolder"></div>-->
-        <div id="chartHolder">
-            <div id="chart1" class="charts">Display Chart 1</div>
-            <div id="chart2" class="charts">Display Chart 2</div>
-            <!--                <div id="chart3">Display Chart 3</div>-->
-        </div>
-        <div id="predictionSelector">
-            <label for="getPredictions"> Choose a date/time to predict bike availability after selecting a station:</label>
+            <div id="chartHolder" class="displayNone">
+                <div id="chart1" class="charts"></div>
+                <div id="chart2" class="charts"></div>
+            </div>
+
+            <div id="predictionSelector" class="displayNone">
+                <p>Choose a date/time to view predicted availability for this station</p>
+                <div id="inputDateTime">
 <!--            Date min/max is initially set to 2010-10-10 as we don't want the user to use this until a station has been selected-->
 <!--            Which will add an event listener to the Get Prediction button and update the min and max dates dynamically-->
-            Date:<input id="predictionDate" type="date" data-date-format="YYYY-MM-DD"name="prediction_date"  min="2010-10-10" max="2010-10-10" value="2010-10-10">
-            Time:<input id="predictionTime" type="time" name="prediction_time" value="09:00">
-            <button id="predictButton" onclick="NoStationPredictReq()">Get Prediction</button>
+                    <label for="predictionDate">Date:</label>
+                        <input id="predictionDate" type="date" data-date-format="YYYY-MM-DD"name="prediction_date"  min="2010-10-10" max="2010-10-10" value="2010-10-10">
+                    <label for="predictionTime">Time:</label>
+                        <input id="predictionTime" type="time" name="prediction_time" value="09:00">
+                <button id="predictButton" onclick="NoStationPredictReq()">Get Prediction</button>
+                </div>
 
+                <div id="predictionOutput" class="displayNone"></div> <!--The output for the prediction will be displayed here-->
         </div>
 
-        <div id="predictionOutput"></div> <!--The output for the prediction will be displayed here-->
     </div>
     <!--END:SIDE PANEL AREA-->
+    </div>
 
-</div>
 <!--END:BODY AREA-->
-
+</div>
 
 <!--BEGIN: Footer Area-->
 <footer id="footer-area">

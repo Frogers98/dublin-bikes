@@ -132,8 +132,8 @@ body {
     height: 90%;
     /*width: 100%;*/
     max-width: 100vw;
-    padding-right: 5px;
-    padding-left: 5px
+    /*padding-right: 5px;*/
+    /*padding-left: 5px;*/
  }
 
 /*#map-area {*/
@@ -145,12 +145,10 @@ body {
 
 #map {
     position: absolute;
-    top: 0;
+    /*top: 0;*/
     right: 0;
     height: 100%;
     width: 70%;
-    /*height: 100%;*/
-    /*width: 100%*/
  }
 
 #directionsPanel {
@@ -167,104 +165,164 @@ body {
     padding-left: 10px;
 }
 
-/*    position: absolute;*/
-/*    top: 10px;*/
-/*    right: 10px;*/
-/*    z-index: 99; */
-/*}*/
-
 /*-------- 5. Side Panel styling  -------*/
 
-#side-panel {
-    position: absolute;
+.displayNone {
+    display: none !important;
+}
+
+#sidePanel {
+    position: relative;
     display: flex;
     justify-content: center;
-    top: 0;
-    left: 0;
     height: 100%;
     width: 30%;
+    font-family: 'Quicksand', sans-serif;
     background-color: #f5f5f5;
 }
 
-#side_panel_default {
+    #sidePanelNav {
+        position: relative;
+        height: 5%;
+        top: 0;
+        width: 100%;
+        background-color: inherit;
+    }
+
+        #sidePanelNav button {
+            background-color: inherit;
+            display: inline-block;
+            float: left;
+            /*padding: 15px 20px;*/
+            height: 100%;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 17px;
+            border-top: none;
+            border-bottom: aqua 2px solid;
+            outline: none;
+            padding-right: 20px;
+            padding-left: 20px;
+        }
+
+/* Change background color of buttons on hover */
+#sidePanelNav button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+#sidePanelNav button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+/*.tabcontent {*/
+/*  display: none;*/
+/*  padding: 6px 12px;*/
+/*  border: 1px solid #ccc;*/
+/*  border-top: none;*/
+/*}*/
+
+#sidePanelDefault {
+    background-color: aqua;
     position: absolute;
-    height: 75%;
-    width: 90%;
-    align-self: center;
-    background-color: #f5f5f5;
+    bottom: 0;
+    height: 95%;
+    width: 100%;
+}
+
+#nearestStationDiv {
+    position: absolute;
+    height: 95%;
+    width: 100%;
+    bottom: 0;
+    /*background-color: #f5f5f5;*/
     font-family: 'Quicksand', sans-serif;
     font-size: 10pt;
+    background-color: lightcoral;
 }
 
-  #headFilterArea {
-      position: absolute;
-      float: right;
-      /*display: inline;*/
-      font-family: 'Quicksand', sans-serif;
-      padding: 3% 2% 3% 4%;
-      text-decoration: none;
-}
+    #nearestStationHolder {
+        position: absolute;
+        height: 75%;
+        width: 90%;
+        align-self: center;
+        background-color: #f5f5f5;
+    }
 
-  #nearestStationHolder {
+#availabilityDiv {
     position: absolute;
-    height: 75%;
-    width: 90%;
-    align-self: center;
-    background-color: #f5f5f5;
-  }
+    height: 95%;
+    width: 100%;
+    bottom: 0;
+    background-color: burlywood;
+    display: flex;
+    flex-direction: column;
+}
 
-  #chartHolder {
-      position: absolute;
-      height: 85%;
-      width: 90%;
-      align-self: center;
-      background-color: #f5f5f5;
-      display: none;
-  }
+    #availabilityDiv div {
+        text-align: left;
+    }
 
-    #chart1 {
-        position: absolute;
-        top: 0;
-        height:33%;
+    #headFilterArea {
+        height: 10%;
+    }
+
+        #headFilterArea label {
+            display: block;
+            font-weight: bold;
+            margin: 10px 0px 5px 5px;
+        }
+
+        #headFilterArea select {
+            margin-left: 5px;
+        }
+
+    #chartHolder {
+        height: 65%;
         width: 100%;
-        background-color: #ffffff;
-  }
+        display: flex;
+        flex-direction: column;
+        background-color: lightblue;
+        justify-content: center;
+    }
 
-    #chart2 {
-        position: absolute;
-        width: 100%;
-        height: 33%;
-        background-color: #ffffff;
-        top: 50%;
-        transform: translateY(-50%);
-  }
+    .charts {
+        margin-left: 50%;
+        transform: translateX(-50%);
+        width: 95%;
+        background-image: url('../static/ajax-loader.gif');
+        background-repeat:no-repeat;
+        background-position: center center;
+    }
 
-  /*This is commented out as we are currently only using two charts*/
-  /*  #chart3 {*/
-  /*      position: absolute;*/
-  /*      bottom: 0;*/
-  /*      height: 33%;*/
-  /*      width: 100%;*/
-  /*      background-color: #ffffff;*/
-  /*}*/
+    #predictionSelector p {
+        font-weight: bold;
+        display: block;
+        margin: 10px 0px 5px 5px;
+    }
 
-    /*The css for this is identical to the charts above*/
-    #predictionSelector {
-        position: absolute;
-        bottom: 0;
-        height: 33%;
-        width: 100%;
-        background-color: #ffffff;
+    #inputDateTime {
+        margin: 10px 0px 5px 5px;
+        display: flex;
+    }
+
+    #inputDateTime label {
+        margin-right: 5px;
+    }
+
+    #inputDateTime input {
+        margin-right: 10px;
+    }
+
+    #predictButton {
+        margin-left: 10px;
     }
 
     #predictionOutput {
-        position: absolute;
+        display: block;
+        margin: 10px 0px 5px 5px;
     }
-
-    /*#side_panel_default {*/
-    /*    font-family: 'Quicksand', sans-serif;*/
-    /*    font-size: 10pt;*/
-    /*}*/
 
     .place {
         font-weight: bold;
@@ -272,11 +330,6 @@ body {
 
     #nearestStationTable th {
         text-align: left;
-    }
-
-    #right-panel {
-        margin-left: 200px;
-        z-index: 5;
     }
 
     #directionsPanel {

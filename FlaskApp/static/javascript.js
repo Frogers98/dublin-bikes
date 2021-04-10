@@ -113,11 +113,7 @@ function initMap() {
     map.setOptions({styles: styleArray});
 
     directionsRenderer.setMap(map);
-    // directionsRenderer.setPanel(document.getElementById("right-panel"));
     directionsRenderer.setPanel(document.getElementById("directionsPanel"));
-
-    // const directionsDisplay = document.getElementById("directionsPanel")
-    // map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(directionsDisplay);
 
     fetch("/stations")
         .then(
@@ -296,8 +292,6 @@ function initMap() {
                 showStationsList(map.data, rankedStations, enteredLocation);
             });
 
-            //Add event lis
-
         }).catch(
         err => {
             console.log("Oops!", err);
@@ -392,11 +386,6 @@ function showStationsList(data, stations, originLocation) {
         console.log("empty stations list");
         return;
     }
-    // let panel = document.getElementById("side_panel_default");
-    // // panel.style.display = "block";
-    //
-    // hideCharts("stationSelector", "showAll");
-    //
 
     const nearestStationTable = document.getElementById("nearestStationHolder");
 
@@ -526,12 +515,17 @@ function filterColours(markerColour) {
 
 function showChartHolder(stationNumber) {
     if (stationNumber != "showAll") {
-        document.getElementById('chartHolder').style.display = "block";
+        document.getElementById("chartHolder").classList.remove("displayNone");
+        document.getElementById("predictionSelector").classList.remove("displayNone");
+        document.getElementById("predictionOutput").classList.remove("displayNone");
     } else {
         // Zoom out and recentre
         map.setZoom(13);
         map.panTo({lat: 53.349804, lng: -6.260310});
-        document.getElementById('chartHolder').style.display = "none";
+        document.getElementById("chartHolder").classList.add("displayNone");
+        document.getElementById("predictionSelector").classList.add("displayNone");
+        document.getElementById("predictionOutput").classList.add("displayNone");
+
     }
 }
 
@@ -540,7 +534,7 @@ function graphDailyInfo(stationNumber, stationName) {
     console.log("IN graphDailyINfo Station number is: " + stationNumber)
 
     console.log("Station info for station" + stationNumber)
-    // Clear the div so the backhround image of a loading spinner can be seen
+    // Clear the div so the background image of a loading spinner can be seen
     document.getElementById("chart1").innerHTML = "";
     // Fetch the data
     fetch(`single_station_availability_stat_by_date/${stationNumber}`).then(
@@ -574,12 +568,49 @@ function graphDailyInfo(stationNumber, stationName) {
         });
 }
 
+function displayDate() {
+    const today = new Date();
+    const days = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday'
+    ]
+    const months = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December'
+    ]
+
+    const currentYear = today.getFullYear();
+    const currentMonth = months[today.getMonth()];
+    const currentDate = today.getDate();
+    const currentDay = days[today.getDay()];
+
+    const formattedDate = new String(currentDate + " " + currentMonth + " " + currentYear)
+
+    document.getElementById("displayDay").textContent = currentDay;
+    document.getElementById("displayDate").textContent = formattedDate;
+}
+
 function graphHourlyInfo(stationNumber, stationName) {
     // Function to graph the average availability by hour for a clicked station
     console.log("IN graphHourlyINfo Station number is: " + stationNumber)
 
     console.log("Station info for station" + stationNumber)
-    // Clear the div so the backhround image of a loading spinner can be seen
+    // Clear the div so the background image of a loading spinner can be seen
     document.getElementById("chart2").innerHTML = "";
     // Fetch the data
     fetch(`single_station_availability_stat_by_hourno/${stationNumber}`).then(
@@ -681,7 +712,17 @@ function getAvailabilityPrediction(stationNumber, requestedDate, requestedTime) 
             // We can now pass this output back to our html
             document.getElementById("predictionOutput").innerHTML = `There should be ${prediction} bikes at this station at ${prediction_request}`
         });
+}
 
+function openTab(tabValue) {
+    let tabArray = ["sidePanelDefault", "availabilityDiv", "nearestStationDiv"];
+    tabArray.forEach(tab => {
+        if (tab == tabValue) {
+            document.getElementById(tab).classList.remove("displayNone");
+        } else {
+            document.getElementById(tab).classList.add("displayNone");
+        }
+    })
 }
 
 function addDays(date, days) {
