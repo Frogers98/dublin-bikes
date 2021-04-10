@@ -14,16 +14,20 @@
 #00.Import Modules
 ####--------------------------------------
 
+
 ######---------BEGIN
 #      ML
 ######--------END
 
-#import nltk as nl
-#import sklearn as sk
-#import matplotlib as mp
-#import xgboost as xg
-#import pymc3 as pymc
-#import sympy as sym
+import nltk as nl
+import sklearn as sk
+import matplotlib as mp
+import xgboost as xg
+import pymc3 as pymc
+import sympy as sym
+
+from sklearn.model_selection import train_test_split, KFold, cross_val_score, GridSearchCV
+from sklearn.metrics import mean_squared_error, accuracy_score, precision_score, recall_score
 
 
 
@@ -32,7 +36,7 @@
 ######--------END
 
 
-import requests as rq
+import requests
 import sqlalchemy as sqla
 #import pyodbc
 #import cx_oracle as cx
@@ -54,15 +58,18 @@ import traceback as tb
 import platform
 import json
 import pprint
+import pickle
 
 ######---------BEGIN
 #     DATA VIS
 ######--------END
 
-#import seaborn as sb
-#import matplotlib as mp
+import seaborn as sns
+import matplotlib as mp
 #from bokeh import *
 #from dash import *
+
+import matplotlib.pyplot as plt
 
 #BeExplicit
 from FlaskApp.data_dictionary import services_dictionary
@@ -1370,3 +1377,486 @@ def avg_station_availability_by_hourno_df_forstat(host,user,password,port,db,sta
         print(error_message+E)
         
     return ldf
+
+
+
+#-#-###-------------------------------------
+#08 Model Functions
+#-#-###-------------------------------------
+
+def add_time_features(df, date_time_column):
+    """
+    Various time features for analytics
+    """
+    
+    #Features to keep
+    #df['timestamp']=(df[date_time_column].astype(int)/10**9).astype(int)
+    df['hour'] = df[date_time_column].dt.hour
+    df['dayofweek'] = df[date_time_column].dt.dayofweek
+    df['dayofmonth'] = df[date_time_column].dt.day
+    df['dayofyear'] = df[date_time_column].dt.day
+    
+    df['bool_weekend']=np.where(df['dayofweek']>4, True, False)
+    #df['bool_level5']=np.where(df['dayofyear']<pd.to_datetime('2021-05-04').dt.day, True, False)
+    
+    #Bank Holidays and weekend
+    df['bool_dayoff']=False
+    
+    df.loc[(df['dayofweek']>4) |
+       (df['dayofyear']==pd.to_datetime('2021-03-17').day) | 
+       (df['dayofyear']==pd.to_datetime('2021-04-05').day) | 
+        (df['dayofyear']==pd.to_datetime('2021-05-04').day),
+       'bool_dayoff'] = True
+    
+    #Work Hours 9am to 5pm
+    df['bool_workhour']=True
+    df.loc[(df['hour']>8) &
+            (df['hour']<16),'bool_workhour']=False
+    
+    df.loc[(df['dayofweek']>4) |
+       ((df['dayofyear']==pd.to_datetime('2021-03-17').day) |
+       (df['dayofyear']==pd.to_datetime('2021-04-05').day) |
+        (df['dayofyear']==pd.to_datetime('2021-05-04').day)),
+       'bool_dayoff'] = True   
+    
+    df['bool_commutehour']=False
+    df.loc[((df['hour']>=7) & (df['hour']<=8)) |
+           ((df['hour']>=16) & (df['hour']<=17)),'bool_commutehour']= True
+       
+    #9pm - 5am
+    df['bool_night']=False
+    df.loc[(df['hour']>20) | 
+            (df['hour']<6),'bool_night']=True
+                        
+    #Poor Results:
+    #df['quarter'] = df[date_time_column].dt.quarter
+    #df['month'] = df[date_time_column].dt.month
+    #df['year'] = df[date_time_column].dt.year
+    #df['minute'] = df[date_time_column].dt.minute
+    #df['weekofyear'] = df[date_time_column].dt.weekofyear
+    #df=d#f.drop(date_time_column, axis=1)
+    
+    return [df,['hour','dayofweek','dayofmonth','bool_weekend','bool_dayoff','bool_workhour','bool_commutehour','bool_night']]
+
+def get_test_date(df,time_column,test_set_size=0.2, verbose=False):
+    """A function to determine what date should be our test date"""
+    
+    #Default Date
+    datetime_at_test_limit=pd.to_datetime('2020-04-01')
+
+    sorted_datetimes=df[time_column].sort_values().unique()
+
+    number_of_datetimes=len(sorted_datetimes)
+    print("Total dates: {}".format(number_of_datetimes))
+
+    number_of_test_dates=test_set_size*number_of_datetimes
+    print("Test dates: {}".format(number_of_test_dates))
+
+    test_index=int(number_of_datetimes - number_of_test_dates)
+    print("Test index: {}".format(test_index))
+
+    datetime_at_test_limit=sorted_datetimes[test_index]
+    
+    if verbose:
+        print("Total dates: {}".format(number_of_datetimes))
+        print("Test dates: {}".format(number_of_test_dates))
+        print("Test index: {}".format(test_index))
+        print("Dates after {} are test dates".format(datetime_at_test_limit))
+        
+
+
+    return datetime_at_test_limit
+
+def create_xgboost_model(fulldf,train_df,test_df,target_column,station_number,plot_comp,plot_tree):
+    """Create an xgboostmodel"""
+    
+    X=fulldf.drop([target_column], axis=1)
+    y=fulldf[target_column]
+    
+    X_test=test_df.drop([target_column], axis=1)
+    y_test= test_df[target_column]
+    
+    X_train=train_df.drop([target_column], axis=1)
+    y_train=train_df[target_column]
+    
+    
+    #Paramter Dictionary
+    
+    model_parameters = {'nthread':[4], #when use hyperthread, xgboost may become slower
+              'objective':['reg:squarederror'],
+              'learning_rate': [.03, 0.05, .07], #so called `eta` value
+              'max_depth': [5, 6, 7,8],
+              'min_child_weight': [4],
+              'subsample': [0.7],
+              'colsample_bytree': [0.7],
+              'n_estimators': [500]}
+
+    #Create the XGBoost Regresspr
+    xg_regression_model = xg.XGBRegressor(objective ='reg:squarederror')
+    
+    #Hypertune
+    grid = GridSearchCV(xg_regression_model, model_parameters)
+    grid.fit(X_train, y_train)
+    
+    best_parameters=grid.best_params_
+    xg_regression_model = grid.best_estimator_
+
+
+    #Score the model
+    score=xg_regression_model.score(X_train,y_train)
+    print("Model Training Score: {}%".format(score*100))
+    
+    #Check the predictions
+    model_prediction = xg_regression_model.predict(X_test)
+    
+    kfold = KFold(n_splits=10)
+    results = cross_val_score(xg_regression_model, X, y, cv=kfold)
+    print("Model Accuracy: {}".format(results * 100))
+    
+    if plot_comp:
+        #Original Versus Prediction
+        print("The Original Vs Predicted Result Is:")
+        plt.figure(figsize=(50,20)) 
+        x_axis = range(len(y_test))
+        plt.plot(x_axis, y_test, label="Original")
+        plt.plot(x_axis, model_prediction, label="Predicted")
+        plt.title("Station test and predicted data")
+        plt.legend()
+        plt.savefig('xg_pred_vs_orig_{}.png'.format(station_number))
+        plt.show()
+    
+    
+    filename = './xg_model_station_{}.pickle'
+    pickle.dump(xg_regression_model, open(filename.format(station_number), 'wb'))
+    
+    pred_vs_act_df=pd.DataFrame({'Actual':y_test,'Predicted':model_prediction})
+    pred_vs_act_df['Predicted']=pred_vs_act_df['Predicted'].astype(int)
+    pred_vs_act_df['Diff']=pred_vs_act_df['Actual']-pred_vs_act_df['Predicted']
+    rmse=np.sqrt(mean_squared_error(y_test, model_prediction))
+    print("RMSE: {}" .format(np.sqrt(mean_squared_error(y_test, model_prediction))))
+    
+    
+    if plot_tree:
+        #Visualisations, sometimes not great
+        try:        
+
+            #Tree Plot
+            print("The Tree Is:")
+            fig, ax = plt.subplots(figsize=(50, 20))
+            xg.plot_tree(xg_regression_model,num_trees=2,ax=ax)
+            plt.savefig('xg_tree_{}.png'.format(station_number))
+            plt.show()
+
+        
+        
+        
+        except Exception as e:
+            print(e)
+        
+    return [xg_regression_model,score,results,pred_vs_act_df,rmse]
+
+
+def create_linear_model(fulldf,train_df,test_df,target_column,station_number,plot_comp):
+    """Create a linear model"""
+    
+    X=fulldf.drop([target_column], axis=1)
+    y=fulldf[target_column]
+    
+    X_test=test_df.drop([target_column], axis=1)
+    y_test= test_df[target_column]
+    
+    X_train=train_df.drop([target_column], axis=1)
+    y_train=train_df[target_column]
+    
+    
+    #Paramter Dictionary
+
+
+    #Create the XGBoost Regresspr
+    lin_regression_model = sk.linear_model.LinearRegression()
+
+
+    #Fit the data
+    lin_regression_model.fit(X_train,y_train)
+    
+    #Check the predictions
+    lin_prediction = lin_regression_model.predict(X_test)
+    
+    if plot_comp:
+        #Original Versus Prediction
+        print("The Original Vs Predicted Result Is:")
+        plt.figure(figsize=(50,20)) 
+        x_axis = range(len(y_test))
+        plt.plot(x_axis, y_test, label="Original")
+        plt.plot(x_axis, lin_prediction, label="Predicted")
+        plt.title("Station test and predicted data")
+        plt.legend()
+        plt.savefig('lin_pred_vs_orig_{}.png'.format(station_number))
+        plt.show()
+    
+    filename = './lin_model_station_{}.pickle'
+    pickle.dump(lin_regression_model, open(filename.format(station_number), 'wb'))
+    
+    pred_vs_act_df=pd.DataFrame({'Actual':y_test,'Predicted':lin_prediction})
+    pred_vs_act_df['Predicted']=pred_vs_act_df['Predicted'].astype(int)
+    pred_vs_act_df['Diff']=pred_vs_act_df['Actual']-pred_vs_act_df['Predicted']
+    rmse=np.sqrt(mean_squared_error(y_test, lin_prediction))
+    print("RMSE: {}" .format(np.sqrt(mean_squared_error(y_test,lin_prediction))))
+        
+    return [lin_regression_model,'','',pred_vs_act_df,rmse]
+
+###ADD IN SAVE TO TEST/TRAIN DB HERE
+def generate_models(raw_df,plot_comp=True,plot_tree=True):
+    """A function to generate models per station"""
+        
+        
+    #HardCoded inputs - NOT A GOOD PRACTICE
+    
+    #Update time column
+    update_time_column='entry_create_date'
+    
+    #Cleansed Columns
+    cleansed_column_mapping={
+                            'number': ['station_number']
+                         , 'address': ['station_address']
+                         , 'banking': ['station_banking']
+                         , 'bike_status': ['station_bike_status']
+                         , 'bike_stands': ['station_bike_stands']
+                         ,  'contract_name': ['contract_name']
+                         , 'name': ['station_name']
+                         , 'position_lat': ['station_position_lat']
+                         , 'position_long': ['station_position_lat']
+                         ,  'available_bikes':['available_bikes']
+                         , 'available_bike_stands':['available_bike_stands']
+                         , 'last_update':['stand_last_update']
+                         , 'created_date':[update_time_column]
+                         , 'weather_position_long':['weather_position_long']
+                         , 'weather_position_lat':['weather_position_lat']
+                         ,  'weather_id':['weather_type_id']
+                         , 'main':['weather_type_main']
+                         , 'description':['weather_type_detail']
+                         , 'icon':['weather_icon_type']
+                         , 'icon_url':['weather_icon_url']
+                         , 'base':['weather_base_name']
+                         , 'temp':['weather_temp']
+                         , 'feels_like':['weather_temp_feels_like']
+                         , 'temp_min':['weather_temp_min']
+                         , 'temp_max':['weather_temp_max']
+                         , 'pressure':['weather_air_pressure']
+                         , 'humidity':['weather_humidity']
+                         , 'visibility':['weather_visibility']
+                         , 'wind_speed':['weather_wind_speed']
+                         , 'wind_degree':['weather_wind_direction']
+                         , 'clouds_all':['clouds']
+                         , 'datetime':['weather_datetime']
+                         , 'sys_id':['weather_system_id']
+                         , 'sys_country':['weather_country']
+                         , 'sys_sunrise':['weather_sunrise_time']
+                         , 'sys_sunset':['weather_sunrise_time']
+                         , 'sys_type':['weather_station_type']
+                         , 'timezone':['weather_timezone']
+                         , 'id':['weather_pk']
+                         , 'weather_name':['weather_place_name']
+                         , 'cod':['weather_code']
+                         }
+    
+    
+    #Features - Initial
+    relevant_feature_columns={
+                    'feature':[
+                                'station_number'
+                               ,update_time_column
+                               ,'weather_type_id'
+                               ,'weather_temp'
+                               ,'weather_temp_feels_like'
+                               ,'weather_air_pressure'
+                               ,'weather_humidity'
+                              ]
+    
+                    ,'target':[
+                                'available_bikes'
+                              ]
+                    
+                            }
+    
+    
+    
+
+    #Staging Dataframe
+    staging_df=raw_df.copy(deep=True)
+    
+    
+    ###------
+    #Rename Columns to Verbose - This should be functionised
+    column_mapping={}
+    
+    for key,value in cleansed_column_mapping.items():
+        for v in value:
+            column_mapping[key] =  v
+
+    
+    staging_df=staging_df.rename(columns=column_mapping)
+    
+    #Column Renaming complete
+    ###------
+    
+    
+    
+    ###------
+    #Drop irrelevant features - This should be functionised
+    keep_columns=[]
+
+    for value in relevant_feature_columns.values():
+        keep_columns+=value
+
+    keep_columns=list(set(keep_columns))
+    ###------
+    
+    
+    ###------
+    #Object column conversion to category for xgboost
+    for object_column in ['station_number']:#,'weather_type_id']:
+        
+        #Check if in column list
+        if object_column in staging_df.columns:
+            
+            #Change to category
+            staging_df[object_column]=staging_df[object_column].astype('category')
+            
+        #Not in column list
+        else:
+            print("Missing {}".format(object_column))
+
+    ###------
+    staging_df=staging_df[keep_columns]
+    
+    #Add on day, hour, week
+    time_feature_list=add_time_features(df=staging_df, date_time_column=update_time_column)
+    
+    #Staging Data with time features added
+    staging_df=time_feature_list[0]
+    
+    #List of the time features added
+    time_columns=time_feature_list[1]
+    
+    #Test Date Cutoff
+    test_date=get_test_date(df=staging_df,time_column=update_time_column, test_set_size=0.2, verbose=False)
+
+    #Get the average per hour - e.g. 5 10 stations, 1 0 station - avg is 50/6
+    
+    groupby_columns=[]
+    
+    for feature in relevant_feature_columns['feature']:
+        if feature not in [update_time_column, 'station_number','weather_temp_feels_like','weather_temp','weather_humidity','weather_air_pressure']:
+            groupby_columns+=[feature]
+            
+    for time_feature in time_columns:
+        groupby_columns+=[time_feature]
+    
+    
+    aggregation_dictionary={relevant_feature_columns['target'][0] : np.nanmean
+                           ,'weather_temp_feels_like' : np.nanmean
+                           ,'weather_temp' : np.nanmean
+                           ,'weather_humidity' : np.nanmean
+                           ,'weather_air_pressure' : np.nanmean
+                           }
+    
+    print(time_columns)
+    print(groupby_columns)
+    print(aggregation_dictionary)
+    
+    
+    station_dataframe_model_list={}
+    
+
+    #For each station in the list
+    for station_number in staging_df['station_number'].sort_values().unique():
+        print("---------------")
+        print("---------------")
+        print("STATION {}".format(station_number))
+        
+        station_dataframe=pd.DataFrame()
+        
+            
+        #Filter adf to that Dataframe
+        station_dataframe=staging_df[staging_df['station_number']==station_number]
+        
+        #Station dataframe non-empty
+        if len(station_dataframe)>0 and station_number!=507 and station_number!=508 and station_number!=509 and station_number!='507' and station_number!='508' and station_number!='509':
+            
+            #Drop feature of cardinality 1
+            if 'station_number' in station_dataframe.columns:
+                station_dataframe=station_dataframe.drop('station_number',axis=1)
+                
+            #Create Training and Test Split
+            station_train_df=station_dataframe[station_dataframe[update_time_column] < test_date]
+            station_test_df=station_dataframe[station_dataframe[update_time_column] >= test_date]
+            
+            
+            station_dataframe=station_dataframe.drop(update_time_column,axis=1)
+            station_train_df=station_train_df.drop(update_time_column,axis=1)
+            station_test_df=station_test_df.drop(update_time_column,axis=1)
+            
+            #Need to do this here for filtering by date - will cause a slight imbalance in size via agg
+            station_dataframe=(station_dataframe
+                     .groupby(groupby_columns)
+                     .agg(aggregation_dictionary)
+                     .reset_index()
+                    .dropna()
+                )            
+            
+            #Need to do this here for filtering by date - will cause a slight imbalance in size via agg
+            station_train_df=(station_train_df
+                     .groupby(groupby_columns)
+                     .agg(aggregation_dictionary)
+                     .reset_index()
+                    .dropna()
+                )
+            
+            
+            #Need to do this here for filtering by date - will cause a slight imbalance in size via agg
+            station_test_df=(station_test_df
+                     .groupby(groupby_columns)
+                     .agg(aggregation_dictionary)
+                     .reset_index()
+                    .dropna()
+                )
+            
+            
+                
+            #One hot encoding of Weather Type
+            #station_dataframe=pd.get_dummies(station_dataframe, drop_first=True)
+            #station_train_df=pd.get_dummies(station_train_df, drop_first=True)
+            #station_test_df=pd.get_dummies(station_test_df, drop_first=True)
+            
+            
+            #Get station model
+            model_result=create_xgboost_model(fulldf=station_dataframe,train_df=station_train_df,test_df=station_test_df,target_column='available_bikes',station_number=station_number,plot_comp=plot_comp,plot_tree=plot_tree)
+            lin_model_result=create_linear_model(fulldf=station_dataframe,train_df=station_train_df,test_df=station_test_df,target_column='available_bikes',station_number=station_number,plot_comp=plot_comp)
+                        
+            #Get list of results to nester dict - Hefty RAM wise
+            station_dataframe_model_list[station_number]={'model':model_result[0]
+                                                         ,'score':model_result[1]
+                                                         ,'results':model_result[2]
+                                                         ,'predicted_vs_actual':model_result[3]
+                                                         ,'rmse':model_result[4]
+                                                        ,'lin_model':lin_model_result[0]
+                                                         ,'lin_score':lin_model_result[1]
+                                                         ,'lin_results':lin_model_result[2]
+                                                         ,'lin_predicted_vs_actual':lin_model_result[3]
+                                                         ,'lin_rmse':lin_model_result[4]
+                                                         }
+        
+        #Pass Station
+        else:
+            print("No Data: {}".format(station_number))
+            
+            
+    return station_dataframe_model_list
+
+
+def wrap_generate_models(host,user,password,port,db, plot_comp=False,plot_tree=False):
+    """A function to run the model generation"""
+
+    raw_df=station_availability_weather_table_df(host,user,password,port,db)  
+    generate_models(raw_df,plot_comp=False,plot_tree=False)
