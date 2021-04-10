@@ -1438,6 +1438,26 @@ def add_time_features(df, date_time_column):
     
     return [df,['hour','dayofweek','dayofmonth','bool_weekend','bool_dayoff','bool_workhour','bool_commutehour','bool_night']]
 
+
+def get_randomised_data(host,user,password,port,db,df,test_size=0.3):
+    """Function to split the dataframe randomly into testing and training data and store these sets as tables in the db"""
+    #print(df.head(5))
+    # Splits the dataset into training and testing sets
+    # 70% training data, 30$ testing data
+    print("about to split into train and test")
+    
+    engine_l=connect_db_engine(host,user,password,port,db)
+    engine=engine_l[1]
+
+    train, test = train_test_split(df, test_size=test_size)
+    print("finished loading train and test dataframes")
+
+    train.to_sql(name='02_availability_train', con=engine, if_exists='replace', index=False)
+    print("finished loading data into 02_availability_train")
+    test.to_sql(name='02_availability_test', con=engine, if_exists='replace', index=False)
+    print("finished loading data into 02_availability_test")
+    return
+
 def get_test_date(df,time_column,test_set_size=0.2, verbose=False):
     """A function to determine what date should be our test date"""
     
@@ -1606,10 +1626,12 @@ def create_linear_model(fulldf,train_df,test_df,target_column,station_number,plo
     return [lin_regression_model,'','',pred_vs_act_df,rmse]
 
 ###ADD IN SAVE TO TEST/TRAIN DB HERE
-def generate_models(raw_df,plot_comp=True,plot_tree=True):
+def generate_models(raw_df,host,user,password,port,db, plot_comp=True,plot_tree=True):
     """A function to generate models per station"""
         
-        
+    engine_l=connect_db_engine(host,user,password,port,db)
+    engine=engine_l[1]
+
     #HardCoded inputs - NOT A GOOD PRACTICE
     
     #Update time column
@@ -1822,7 +1844,12 @@ def generate_models(raw_df,plot_comp=True,plot_tree=True):
                     .dropna()
                 )
             
+            try:
+                station_train_df.to_sql(name='02_station_avail_weather_train', con=engine, if_exists='replace', index=False)
+                station_test_df.to_sql(name='02_station_avail_weather_test', con=engine, if_exists='replace', index=False)
             
+            except Exception as e:
+                print("Exception posting testing and training data: {}".format(e))
                 
             #One hot encoding of Weather Type
             #station_dataframe=pd.get_dummies(station_dataframe, drop_first=True)
@@ -1850,8 +1877,9 @@ def generate_models(raw_df,plot_comp=True,plot_tree=True):
         #Pass Station
         else:
             print("No Data: {}".format(station_number))
-            
-            
+
+    engine.dispose()        
+    
     return station_dataframe_model_list
 
 
@@ -1859,4 +1887,6 @@ def wrap_generate_models(host,user,password,port,db, plot_comp=False,plot_tree=F
     """A function to run the model generation"""
 
     raw_df=station_availability_weather_table_df(host,user,password,port,db)  
-    generate_models(raw_df,plot_comp=False,plot_tree=False)
+    model_data=generate_models(raw_df,host,user,password,port,db,plot_comp=False,plot_tree=False)
+
+    return model_data
