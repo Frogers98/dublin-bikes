@@ -215,22 +215,39 @@ function initMap() {
                         showChartHolder(marker.number);
                         graphDailyInfo(marker.number, marker.name);
                         graphHourlyInfo(marker.number, marker.name);
+
+                        // Dynamically set the min and max date for requesting predicted availability
+                        // The min will be set to today and the max will be set for 5 days from now
+                        // Adapted from https://stackoverflow.com/questions/17182544/disable-certain-dates-from-html5-datepicker
+                        var today = new Date().toISOString().split('T')[0];
+                        document.getElementById("predictionDate").setAttribute('min', today);
+                        // We can also set the value to today so it will already be filled like that
+                        document.getElementById("predictionDate").setAttribute('value', today);
+
+                        var maxDay = addDays(new Date(), 5);
+                        maxDay = maxDay.toISOString().split('T')[0]
+                        document.getElementById("predictionDate").setAttribute('max', maxDay);
+
+
                         // This will add the event listener for requesting predicted availability
                         // Adapted from https://stackoverflow.com/questions/23640351/how-to-convert-html5-input-type-date-and-time-to-javascript-datetime
                         // Leaving this here means that we can keep track of the clicked station
                         // Only potential issue with this is if someone tries to click the button but hasn't already selected a station
                         // In which case nothing will happen at all as this listener won't have been created yet.
                         let predictionButton = document.getElementById("predictButton")
+                        // First we need to remove the initial onclick function we gave the button which was to display an error message
+                        // if clicked before selecting a station
+                        predictionButton.onclick = null;
                         predictionButton.addEventListener("click", function () {
                             let predictionDate = document.getElementById("predictionDate").value;
                             let predictionTime = document.getElementById("predictionTime").value;
-                            let prediction_request = new String(predictionDate + " " + predictionTime);
+
                             // console.log(prediction_request);
                             // alert("This worked!, selected station was " + marker.name);
 
                             // Pass the station number and the requested date/time to our function that will then request
                             // The prediction from our ML model in the backend
-                            getAvailabilityPrediction(marker.number, prediction_request)
+                            getAvailabilityPrediction(marker.number, predictionDate, predictionTime)
                         });
                     });
                 });
@@ -620,37 +637,57 @@ function nearestStationInfo(stationNumber) {
 }
 
 function calculateAndDisplayRoute(originLocation, stationLocation) {
-  directionsService.route(
-    {
-      origin: originLocation,
-      destination: stationLocation,
-      travelMode: google.maps.TravelMode.WALKING,
-    },
-    (response, status) => {
-      if (status === "OK") {
-          const directionsDisplay = document.getElementById("directionsPanel");
-          directionsDisplay.style.display = "block";
-          directionsRenderer.setDirections(response);
-      } else {
-        window.alert("Directions request failed due to " + status);
-      }
-    }
-  );
+    directionsService.route(
+        {
+            origin: originLocation,
+            destination: stationLocation,
+            travelMode: google.maps.TravelMode.WALKING,
+        },
+        (response, status) => {
+            if (status === "OK") {
+                const directionsDisplay = document.getElementById("directionsPanel");
+                directionsDisplay.style.display = "block";
+                directionsRenderer.setDirections(response);
+            } else {
+                window.alert("Directions request failed due to " + status);
+            }
+        }
+    );
 }
 
-function getAvailabilityPrediction(stationNumber, requestedTime) {
+function NoStationPredictReq() {
+    // Function that will be called if the request prediction button is clicked before first clicking a station
+    alert("Please select a marker to view available prediction times.\nWe can only show predictions from between today and the next 5 days.")
+}
+
+function getAvailabilityPrediction(stationNumber, requestedDate, requestedTime) {
     console.log("In prediction function, station number is: " + stationNumber)
-    fetch(  `/test_model/${requestedTime}/${stationNumber}`).then(
-         response => {
+    console.log("Requested date is: " + requestedDate)
+    console.log("Requested time is: " + requestedTime)
+    // Check if the requested prediction date is the default date from 2010, if so alert an error message
+
+    let prediction_request = new String(requestedDate + " " + requestedTime);
+
+    fetch(`/test_model/${requestedTime}/${stationNumber}`).then(
+        response => {
             return response.json();
         }
     ).then(
         prediction => {
-        console.log("This is where the prediction will go, instead of a prediction the station name is: " + prediction);
-        console.log("Requested time was " + requestedTime);
-        alert("This worked should see details in console!");
-        // We can now pass this output back to our html
-        document.getElementById("predictionOutput").innerHTML = `There should be ${prediction} bikes at this station at ${requestedTime}`
-    });
+            console.log("This is where the prediction will go, instead of a prediction the station name is: " + prediction);
+            console.log("Requested time was " + prediction_request);
+            //alert("This worked should see details in console!");
+            // We can now pass this output back to our html
+            document.getElementById("predictionOutput").innerHTML = `There should be ${prediction} bikes at this station at ${prediction_request}`
+        });
 
+}
+
+function addDays(date, days) {
+    // Function to add a certain amount of days to a date
+    // This is currently used to find the date five days from the current date to set the max date in the date picker
+    // Taken from https://stackoverflow.com/questions/563406/add-days-to-javascript-date
+    var result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
 }
