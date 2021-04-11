@@ -48,20 +48,19 @@ Note: Use CTRL+F and the Number with a dot to navigate to that section.
     padding: 1% 2% 1% 2%;
     text-decoration: none;
     font-weight: bold;
-    font-size: 15px;
+    font-size: 18px;
   }
 
   /* Change the color of links on hover */
   #header a:hover {
-    background-color: #F9F9F6;
-    color: #444;
+    color: #898989;
   }
   
   /* Add a color to the active/current link */
-  #header a.active {
-    background-color: #F9F9F6;
-    color: white
-  }
+  /*#header a.active {*/
+  /*  background-color: #F9F9F6;*/
+  /*  color: white*/
+  /*}*/
 
 /*#stationSelector {*/
 /*    margin-left: auto;*/
@@ -153,22 +152,28 @@ body {
 
 #directionsPanel {
     position: absolute;
-    top: 10px;
-    left: 25%;
+    bottom: 0;
+    /*top: 10px;*/
+    /*left: 25%;*/
     z-index: 5;
-    background-color: #fff;
-    padding: 5px;
+    background-color: #ffffff;
+    /*padding: 5px;*/
     border: 1px solid #999;
     /*text-align: center;*/
     /*font-family: "Roboto", "sans-serif";*/
     /*line-height: 30px;*/
-    padding-left: 10px;
+    /*padding-left: 10px;*/
 }
 
 /*-------- 5. Side Panel styling  -------*/
 
 .displayNone {
     display: none !important;
+}
+
+#sidePanelNav button.active {
+    background-color: #ffffff !important;
+    border-bottom: none !important;
 }
 
 #sidePanel {
@@ -190,30 +195,32 @@ body {
     }
 
         #sidePanelNav button {
-            background-color: inherit;
+            background-color: #9e9e9e;
             display: inline-block;
             float: left;
             /*padding: 15px 20px;*/
             height: 100%;
             cursor: pointer;
             transition: 0.3s;
-            font-size: 17px;
-            border-top: none;
-            border-bottom: aqua 2px solid;
+            font-size: 16px;
+            border-bottom: 3px solid #787878;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
             outline: none;
-            padding-right: 20px;
-            padding-left: 20px;
+            width: 33.33%;
+            color: #3e3e3e;
         }
 
 /* Change background color of buttons on hover */
-#sidePanelNav button:hover {
-  background-color: #ddd;
+            #sidePanelNav button:hover {
+                background-color: #7a7a7a;
 }
 
-/* Create an active/current tablink class */
-#sidePanelNav button.active {
-  background-color: #ccc;
-}
+/* Change appearance of active button */
+/*            #sidePanelNav button.active {*/
+/*                background-color: #ffffff !important;*/
+/*                border-bottom: none !important;*/
+/*            }*/
 
 /* Style the tab content */
 /*.tabcontent {*/
@@ -224,30 +231,81 @@ body {
 /*}*/
 
 #sidePanelDefault {
-    background-color: aqua;
+    background-color: #ffffff;
     position: absolute;
     bottom: 0;
     height: 95%;
     width: 100%;
 }
+
+    #sidePanelDefault div {
+        position: relative;
+        display: block;
+    }
+
+        #displayDay {
+            color: #787878;
+            margin: 50px 30px 20px 20px;
+            font-size: 44pt;
+        }
+
+        #displayDate {
+            color: #787878;
+            margin: 30px 30px 20px 20px;
+            font-size: 26pt;
+        }
+
+        #displayWeatherType {
+            color: #787878;
+            margin: 40px 30px 20px 20px;
+            font-size: 16pt;
+        }
+
+        #icon {
+            position: absolute;
+            width: 30%;
+            margin-left: 50%;
+            transform: translateX(-50%);
+        }
 
 #nearestStationDiv {
     position: absolute;
     height: 95%;
     width: 100%;
     bottom: 0;
-    /*background-color: #f5f5f5;*/
     font-family: 'Quicksand', sans-serif;
-    font-size: 10pt;
-    background-color: lightcoral;
+    background-color: #ffffff;
 }
+
+    #nearestStationDiv p {
+        position: relative;
+        display: block;
+        font-weight: bold;
+        margin: 10px 0px 5px 5px;
+    }
+
+    #locationSearch {
+        margin: 10px 0px 5px 5px;
+    }
 
     #nearestStationHolder {
         position: absolute;
-        height: 75%;
-        width: 90%;
+        bottom: 0;
+        height: 88%;
+        width: 60%;
         align-self: center;
-        background-color: #f5f5f5;
+        background-color: #ffffff;
+        font-size: 10pt;
+    }
+
+    #stationNameRow {
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    #getDirectionsRow {
+        text-decoration: underline;
+        cursor: pointer;
     }
 
 #availabilityDiv {
@@ -255,7 +313,7 @@ body {
     height: 95%;
     width: 100%;
     bottom: 0;
-    background-color: burlywood;
+    background-color: #ffffff;
     display: flex;
     flex-direction: column;
 }
@@ -283,7 +341,7 @@ body {
         width: 100%;
         display: flex;
         flex-direction: column;
-        background-color: lightblue;
+        background-color: inherit;
         justify-content: center;
     }
 
@@ -332,18 +390,19 @@ body {
         text-align: left;
     }
 
-    #directionsPanel {
-        width: 200px;
-        display: none;
-    }
-    /*    background: #fff;*/
-    /*    padding: 5px;*/
-    /*    font-size: 14px;*/
-    /*    font-family: Arial;*/
-    /*    border: 1px solid #ccc;*/
-    /*    box-shadow: 0 2px 2px rgba(33, 33, 33, 0.4);*/
+    /*#directionsPanel {*/
+    /*    position: absolute;*/
+    /*    bottom: 0;*/
     /*    display: none;*/
     /*}*/
+    /*!*    background: #fff;*!*/
+    /*!*    padding: 5px;*!*/
+    /*!*    font-size: 14px;*!*/
+    /*!*    font-family: Arial;*!*/
+    /*!*    border: 1px solid #ccc;*!*/
+    /*!*    box-shadow: 0 2px 2px rgba(33, 33, 33, 0.4);*!*/
+    /*!*    display: none;*!*/
+    /*!*}*!*/
 /*--------- 5. Link styling -------------*/
 
 /* href Styling */

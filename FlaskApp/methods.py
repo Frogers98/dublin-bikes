@@ -492,6 +492,30 @@ def availability_table_for_station_df(host,user,password,port,db,station_no):
     return df
 
 
+def weather_last_update_df(host, user, password, port, db):
+    """Retrieve weather last update.
+
+    Return table as dataframe
+    """
+
+    print("Inside setup_database()\n\n")
+
+    engine_l = connect_db_engine(host, user, password, port, db)
+    engine = engine_l[1]
+    df = pd.DataFrame()
+
+    # no error
+    try:
+        df = pd.read_sql(SQL_select_weather_last_update, engine)
+
+    except Exception as e:
+        print(e)
+
+    engine.dispose()
+
+    return df
+
+
 
 ####--------------------------------------
 #07. Analytics function

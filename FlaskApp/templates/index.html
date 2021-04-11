@@ -33,7 +33,7 @@
 
 
 <!--BEGIN: Body Area-->
-<body onload="displayDate()">
+<body onload="displayDate(); displayWeather()">
 
 <!--BEGIN: Header DIV Area-->
 <header id="header">
@@ -61,7 +61,7 @@
                 <label for="yellowMarkers">
                     <input type="radio" name="colourFilter"
                            value="http://maps.google.com/mapfiles/ms/icons/yellow-dot.png" id="yellowRadio"
-                           onchange="filterColours(this.value)"><25%></label>
+                           onchange="filterColours(this.value)"><25%</label>
                 <label for="RedMarkers">
                     <input type="radio" name="colourFilter"
                            value="http://maps.google.com/mapfiles/ms/icons/red-dot.png"
@@ -80,8 +80,8 @@
 <!--BEGIN: BODY Area-->
 <div id="mainbody-area">
 
-    <div id="directionsPanel"></div>
     <div id="map"><!--MapGoesHere--></div>
+    <div id="directionsPanel"></div>
 
 
     <!--BEGIN: SIDE PANEL Area-->
@@ -89,9 +89,9 @@
     <div id="sidePanel">
 
         <div id="sidePanelNav">
-            <button class="tablinks" onclick="openTab('sidePanelDefault')">Welcome</button>
-            <button class="tablinks" onclick="openTab('nearestStationDiv')">Nearest Stations</button>
-            <button class="tablinks" onclick="openTab('availabilityDiv')">Availability</button>
+            <button id="homeBtn" class="active" onclick="openTab('sidePanelDefault', 'homeBtn')">Welcome</button>
+            <button id="nearBtn" onclick="openTab('nearestStationDiv', 'nearBtn')">Nearest Stations</button>
+            <button id="availBtn" onclick="openTab('availabilityDiv', 'availBtn')">Availability</button>
 
         </div>
 
@@ -99,6 +99,8 @@
 
                 <h2 id="displayDay"></h2>
                 <h3 id="displayDate"></h3>
+                <div id="displayWeatherType"></div>
+                <div id="displayWeatherIcon"></div>
 
         </div>
 

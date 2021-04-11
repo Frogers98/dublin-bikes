@@ -22,6 +22,7 @@ let markersArray = [];
 let geoJson = {};
 geoJson["type"] = "FeatureCollection";
 geoJson["features"] = [];
+let enteredLocationMarker;
 
 let directionsService;
 let directionsRenderer;
@@ -107,7 +108,6 @@ function initMap() {
         {
             center: {lat: 53.349804, lng: -6.260310},
             zoom: 13.5,
-            // markersArray: [], // Array to hold all markers
         });
 
     map.setOptions({styles: styleArray});
@@ -264,7 +264,7 @@ function initMap() {
             // Create autocomplete input box
             autocomplete = new google.maps.places.Autocomplete(input, options);
             autocomplete.bindTo("bounds", map);
-            const enteredLocationMarker = new google.maps.Marker({map: map});
+            enteredLocationMarker = new google.maps.Marker({map: map});
             enteredLocationMarker.setVisible(false);
             let enteredLocation = map.getCenter();
 
@@ -410,12 +410,12 @@ function showStationsList(data, stations, originLocation) {
         });
         // document.getElementById("nearestStationHolder").appendChild(stationNameRow);
         const stationNameCell = stationNameRow.insertCell();
-        stationNameCell.innerHTML = currentStationName;
+        stationNameCell.innerHTML = currentStationName + " " + currentStationDistText;
 
-        const walkingDistRow = nearestStationTable.insertRow();
-        walkingDistRow.setAttribute("id", "walkingDistRow");
-        const walkingDistCell = walkingDistRow.insertCell();
-        walkingDistCell.innerHTML = "Walking distance: " + currentStationDistText;
+        // const walkingDistRow = nearestStationTable.insertRow();
+        // walkingDistRow.setAttribute("id", "walkingDistRow");
+        // const walkingDistCell = walkingDistRow.insertCell();
+        // walkingDistCell.innerHTML = "Walking distance: " + currentStationDistText;
 
         const availBikesRow = nearestStationTable.insertRow();
         availBikesRow.setAttribute("id", "availBikesRow");
@@ -520,8 +520,7 @@ function showChartHolder(stationNumber) {
         document.getElementById("predictionOutput").classList.remove("displayNone");
     } else {
         // Zoom out and recentre
-        map.setZoom(13);
-        map.panTo({lat: 53.349804, lng: -6.260310});
+        resetMap();
         document.getElementById("chartHolder").classList.add("displayNone");
         document.getElementById("predictionSelector").classList.add("displayNone");
         document.getElementById("predictionOutput").classList.add("displayNone");
@@ -603,6 +602,22 @@ function displayDate() {
 
     document.getElementById("displayDay").textContent = currentDay;
     document.getElementById("displayDate").textContent = formattedDate;
+}
+
+function displayWeather() {
+    fetch("/current_weather").then(
+        response => {
+            return response.json();
+        }).then(
+            data => {
+                console.log(data[0]["main"])
+                document.getElementById("displayWeatherType").textContent = "Weather conditions in Dublin: " + data[0]["main"];
+                const weatherIcon = document.createElement("img");
+                weatherIcon.src = data[0]["icon_url"];
+                weatherIcon.setAttribute("id", "icon");
+                document.getElementById("displayWeatherIcon").appendChild(weatherIcon);
+
+            })
 }
 
 function graphHourlyInfo(stationNumber, stationName) {
@@ -714,13 +729,41 @@ function getAvailabilityPrediction(stationNumber, requestedDate, requestedTime) 
         });
 }
 
-function openTab(tabValue) {
+function resetMap() {
+    // Reset to default view
+    map.setZoom(13.5);
+    map.panTo({lat: 53.349804, lng: -6.260310});
+
+    markersArray.forEach(marker => {
+        marker.infowindow.close(map, marker);
+        marker.setVisible(true);
+    });
+
+    enteredLocationMarker.setVisible(false);
+    directionsRenderer.set('directions', null);
+    document.getElementById("directionsPanel").style.display = "none";
+}
+
+function openTab(tabValue, buttonValue) {
+    // Reset when switching tabs
+    resetMap();
+
     let tabArray = ["sidePanelDefault", "availabilityDiv", "nearestStationDiv"];
+    let buttonArray = ["homeBtn", "availBtn", "nearBtn"];
+
     tabArray.forEach(tab => {
         if (tab == tabValue) {
             document.getElementById(tab).classList.remove("displayNone");
         } else {
             document.getElementById(tab).classList.add("displayNone");
+        }
+    });
+
+    buttonArray.forEach(button => {
+        if (button == buttonValue) {
+            document.getElementById(button).classList.add("active");
+        } else {
+            document.getElementById(button).classList.remove("active");
         }
     })
 }
