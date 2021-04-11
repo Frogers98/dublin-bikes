@@ -19,8 +19,8 @@
 import pandas as pd
 import datetime as dt
 from flask import Flask, render_template
-from methods import *
-from data_dictionary import fr_database_dictionary, ar_database_dictionary, js_database_dictionary
+from FlaskApp.methods import *
+from FlaskApp.data_dictionary import fr_database_dictionary, ar_database_dictionary, js_database_dictionary
 
 
 
@@ -295,14 +295,14 @@ def getPrediction(requested_time, no):
 
 ###----RUN----####
 
-#from tests import run_tests
+from FlaskApp.tests import run_tests
 
 if __name__=="__main__":
     print('Running')
 
-    #test_result=False
-    #test_result=run_tests(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
+    test_result=False
+    test_result=run_tests(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
 
     #Check if the python test cases run alright
-    #if test_result:
-    app.run(debug=True,port=5000)
+    if test_result:
+        app.run(debug=True,port=5000)
