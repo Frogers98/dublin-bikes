@@ -20,7 +20,7 @@ import pandas as pd
 import datetime as dt
 from flask import Flask, render_template
 from FlaskApp.methods import *
-from FlaskApp.data_dictionary import database_dictionary, ar_database_dictionary, js_database_dictionary
+from FlaskApp.data_dictionary import fr_database_dictionary, ar_database_dictionary, js_database_dictionary
 
 
 
@@ -35,11 +35,11 @@ app = Flask(__name__)
 #02.DEFINE DATABASE CONNECTION
 ####--------------------------------------
 
-# myhost=ar_database_dictionary['endpoint']
-# myuser=ar_database_dictionary['username']
-# mypassword=ar_database_dictionary['password']
-# myport=ar_database_dictionary['port']
-# mydb=ar_database_dictionary['database']
+myhost=ar_database_dictionary['endpoint']
+myuser=ar_database_dictionary['username']
+mypassword=ar_database_dictionary['password']
+myport=ar_database_dictionary['port']
+mydb=ar_database_dictionary['database']
 
 # myhost=fr_database_dictionary['endpoint']
 # myuser=fr_database_dictionary['username']
@@ -47,11 +47,11 @@ app = Flask(__name__)
 # myport=fr_database_dictionary['port']
 # mydb=fr_database_dictionary['database']
 
-myhost=js_database_dictionary['endpoint']
-myuser=js_database_dictionary['username']
-mypassword=js_database_dictionary['password']
-myport=js_database_dictionary['port']
-mydb=js_database_dictionary['database']
+# myhost=js_database_dictionary['endpoint']
+# myuser=js_database_dictionary['username']
+# mypassword=js_database_dictionary['password']
+# myport=js_database_dictionary['port']
+# mydb=js_database_dictionary['database']
 
 
 ####--------------------------------------

@@ -73,7 +73,7 @@ import matplotlib.pyplot as plt
 
 #BeExplicit
 from FlaskApp.data_dictionary import services_dictionary
-from FlaskApp.data_dictionary import database_dictionary
+from FlaskApp.data_dictionary import ar_database_dictionary
 from FlaskApp.data_dictionary import database_schema
 from FlaskApp.sql import *
 

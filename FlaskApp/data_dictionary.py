@@ -18,7 +18,7 @@ ar_database_dictionary={
                     }
 
 
-database_dictionary={
+fr_database_dictionary={
                         'username':'admin'
                         ,'password':'DublinBikesProject2201'
                         ,'database':'dublin_bikes'
