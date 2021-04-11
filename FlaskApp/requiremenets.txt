@@ -149,14 +149,11 @@ systemInfo==0.2
 tdqm==0.0.1
 tensorboard==2.2.2
 tensorboard-plugin-wit==1.6.0.post3
-tensorflow==2.2.0
-tensorflow-estimator==2.2.0
 termcolor==1.1.0
 terminado==0.9.1
 testpath==0.4.4
 Theano-PyMC==1.1.2
 threadpoolctl==2.1.0
-tika==1.24
 toml==0.10.1
 tornado==6.0.4
 tqdm==4.46.0
