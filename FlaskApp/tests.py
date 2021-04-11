@@ -8,7 +8,7 @@
 ##
 ##------------------APP---------------##
 
-from methods import *
+from FlaskApp.methods import *
 
 
 ##------------------01. Connection Tests---------------##
