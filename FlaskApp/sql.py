@@ -1,10 +1,11 @@
 ##------------------APP---------------##
 ## 
 ##User:     Disappster
-##DC:       2021-03-01
-##DLM:      2021-03-01
+##DC:       2021-03-24
+##DLM:      2021-03-24
 ##MC:       COMP30830
 ##SD:       SQL Statements
+##LD:       This section should hold all of the CODEBASE for SQL commands. SQL Commands should not exist in other app areas.
 ##
 ##------------------APP---------------##
 
@@ -104,10 +105,9 @@ SQL_select_availability_where_number="""
         ,FROM_UNIXTIME(avail.{})             AS              last_update
         ,FROM_UNIXTIME(avail.{})             AS              created_date
     FROM
-        avail.{} avail
+        {} avail
     WHERE
-        avail.{}
-    """.format(
+        avail.{}""".format(
             'number'
             ,'available_bikes'
             ,'available_bike_stands'
@@ -691,7 +691,110 @@ SQL_select_station_avail_weather_conditionals="""
         available.created_date=weather.created_date
     """
 
+SQL_select_forecast="""
+    SELECT
+        {}                              AS          number
+        ,{}                             AS          position_long
+        ,{}                             AS          position_lat
+        ,{}                             AS          weather_id
+        ,{}                             AS          main
+        ,{}                             AS          description
+        ,{}                             AS          icon
+        ,{}                             AS          icon_url
+        ,{}                             AS          temp
+        ,{}                             AS          feels_like          
+        ,{}                             AS          temp_min
+        ,{}                             AS          temp_max
+        ,{}                             AS          pressure
+        ,{}                             AS          humidity
+        ,{}                             AS          visibility
+        ,{}                             AS          wind_speed
+        ,{}                             AS          wind_degree
+        ,{}                             AS          clouds_all
+        ,FROM_UNIXTIME({})              AS          forecast_time_dt
+        ,{}                             AS          forecast_time_txt
+        ,FROM_UNIXTIME({})              AS          created_date
+    FROM
+        {} 
+    """.format('number'
+            ,'position_long'
+            ,'position_lat'
+            ,'weather_id'
+            ,'main'
+            ,'description'
+            ,'icon'
+            ,'icon_url'
+            ,'temp'
+            ,'feels_like'
+            ,'temp_min'
+            ,'temp_max'
+            ,'pressure'
+            ,'humidity'
+            ,'visibility'
+            ,'wind_speed'
+            ,'wind_degree'
+            ,'clouds_all'
+            ,'forecast_time_dt'
+            ,'forecast_time_txt'
+            ,'created_date'
+            ,'01_forecast')
 
+
+
+#Populate the Time and Date
+SQL_select_forecast_where_station_and_time="""
+  SELECT
+        x.number
+        ,x.weather_id
+        ,x.main
+        ,x.description
+        ,x.temp
+        ,x.feels_like
+        ,x.temp_min
+        ,x.temp_max
+        ,x.pressure
+        ,x.humidity
+        ,x.visibility
+        ,x.wind_speed
+        ,x.wind_degree
+        ,x.clouds_all
+        ,x.forecast_time_dt
+    FROM
+        (SELECT
+            fore.number
+            ,fore.position_long
+            ,fore.position_lat
+            ,fore.weather_id
+            ,fore.main
+            ,fore.description
+            ,fore.icon
+            ,fore.icon_url
+            ,fore.temp
+            ,fore.feels_like
+            ,fore.temp_min
+            ,fore.temp_max
+            ,fore.pressure
+            ,fore.humidity
+            ,fore.visibility
+            ,fore.wind_speed
+            ,fore.wind_degree
+            ,fore.clouds_all
+            ,fore.forecast_time_dt
+            ,fore.forecast_time_txt
+            ,fore.created_date
+        FROM 
+            ({}) fore
+        WHERE
+            fore.{}=""".format(SQL_select_forecast,'number',)+"""'{}'"""+"""
+            AND
+            fore.forecast_time_dt<=""" + """CAST('{}:00' AS DATETIME)"""+"""
+        ) x
+
+    ORDER BY
+		forecast_time_dt
+    DESC
+        
+	LIMIT 1;"""
 
 SQL_select_limit_availability= """SELECT 
                                         * 

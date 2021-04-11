@@ -2,8 +2,10 @@
 
 <html lang="en">
 
-<!-- BEGIN: Header Area: Source my assignment 1 submission -->
+<!-- BEGIN: Head Area: -->
 <head>
+    <!--Load the google charts library-->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
     <!--SEO-->
     <meta http-equiv="About" content="text/html; charset=utf-8">
@@ -14,43 +16,167 @@
 
     <!--Title-->
     <title>Dublin Bike About Page</title>
-    
+
     <!--CSS-->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheet.css') }}">
     <link href='http://fonts.googleapis.com/css?family=Quicksand' rel='stylesheet' type='text/css'>
     <link href='http://fonts.googleapis.com/css?family=Montserrat' rel='stylesheet' type='text/css'>
 
-    
+
     <!--JS-->
     <link type="text/javascript" href="{{ url_for('static', filename='javascript.js') }}">
-    <script src="{{ url_for('static', filename='javascript.js') }}" defer async></script>
-</head>
-<!-- END: Header Area -->
+    <script src="{{ url_for('static', filename='javascript.js') }}"></script>
 
+
+</head>
+<!-- END: Head Area -->
 
 
 <!--BEGIN: Body Area-->
-<body>
+<body onload="displayDate(); displayWeather()">
 
-<div id="header">
+<!--BEGIN: Header DIV Area-->
+<header id="header">
 
-      Choose a station:
-        <select name="stationSelector" id="stationSelector" onchange="filterMarkers(this.value)">
-            <option value="showAll">Show All Stations</option>
-            {% for station in station_data %}
-            <option value="{{ station.number }}">{{ station.name }}</option>
-            {% endfor %}
-      </select>
+    <!--BEGIN: Title Area-->
+    <div class="wrapper">
+        <!--END: Title Area-->
+
+        <!--BEGIN: Links Area-->
+
+        <nav id="navbarheader">
+            <a class="HeaderLink" href="/index">Stations</a>
+            <a class="HeaderLink" href="/about">About Disappster</a>
+            <div id="ColoursRadio">Filter markers by % of available bikes:
+                <label for="allMarkers">
+                    <input type="radio" name="colourFilter"
+                           value="allColours"
+                           id="allRadio"
+                           onchange="filterColours(this.value)" checked>All percentages</label>
+                <label for="greenMarkers">
+                    <input type="radio" name="colourFilter"
+                           value="http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+                           id="greenRadio"
+                           onchange="filterColours(this.value)">>25%</label>
+                <label for="yellowMarkers">
+                    <input type="radio" name="colourFilter"
+                           value="http://maps.google.com/mapfiles/ms/icons/yellow-dot.png" id="yellowRadio"
+                           onchange="filterColours(this.value)"><25%</label>
+                <label for="RedMarkers">
+                    <input type="radio" name="colourFilter"
+                           value="http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+                           onchange="filterColours(this.value)">0%</label>
+            </div>
+
+        </nav>
+
+        <!--END: Links Area-->
+    </div>
+
+
+</header>
+<!--END: Header DIV Area-->
+
+<!--BEGIN: BODY Area-->
+<div id="mainbody-area">
+
+    <div id="map"><!--MapGoesHere--></div>
+    <div id="directionsPanel"></div>
+
+
+    <!--BEGIN: SIDE PANEL Area-->
+
+    <div id="sidePanel">
+
+        <div id="sidePanelNav">
+            <button id="homeBtn" class="active" onclick="openTab('sidePanelDefault', 'homeBtn')">Welcome</button>
+            <button id="nearBtn" onclick="openTab('nearestStationDiv', 'nearBtn')">Nearest Stations</button>
+            <button id="availBtn" onclick="openTab('availabilityDiv', 'availBtn')">Availability</button>
+
+        </div>
+
+        <div id="sidePanelDefault">
+
+                <h2 id="displayDay"></h2>
+                <h3 id="displayDate"></h3>
+                <div id="displayWeatherType"></div>
+                <div id="displayWeatherIcon"></div>
+
+        </div>
+
+        <div id="nearestStationDiv" class="displayNone">
+
+            <p>Enter your location to find stations nearby</p>
+            <div id="locationSearch">
+                <input type="text" id="enterLocation" placeholder="Search"/>
+            </div>
+            <table id="nearestStationHolder"></table>
+
+        </div>
+
+        <div id="availabilityDiv" class="displayNone">
+
+            <div id="headFilterArea">
+                <label>Choose a station to view availability</label>
+                <select name="stationSelector" id="stationSelector"
+                        onchange="filterMarkers(this.value); showChartHolder(this.value)">
+                    <option value="showAll">Show All Stations</option>
+                    {% for station in station_data %}
+                    <option value="{{ station.number }}">{{ station.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div id="chartHolder" class="displayNone">
+                <div id="chart1" class="charts"></div>
+                <div id="chart2" class="charts"></div>
+            </div>
+
+            <div id="predictionSelector" class="displayNone">
+                <p>Choose a date/time to view predicted availability for this station</p>
+                <div id="inputDateTime">
+<!--            Date min/max is initially set to 2010-10-10 as we don't want the user to use this until a station has been selected-->
+<!--            Which will add an event listener to the Get Prediction button and update the min and max dates dynamically-->
+                    <label for="predictionDate">Date:</label>
+                        <input id="predictionDate" type="date" data-date-format="YYYY-MM-DD"name="prediction_date"  min="2010-10-10" max="2010-10-10" value="2010-10-10">
+                    <label for="predictionTime">Time:</label>
+                        <input id="predictionTime" type="time" name="prediction_time" value="09:00">
+                <button id="predictButton" onclick="NoStationPredictReq()">Get Prediction</button>
+                </div>
+
+                <div id="predictionOutput" class="displayNone"></div> <!--The output for the prediction will be displayed here-->
+        </div>
+
+    </div>
+    <!--END:SIDE PANEL AREA-->
+    </div>
+
+<!--END:BODY AREA-->
 </div>
 
-<div id="map"></div>
-</body>
+<!--BEGIN: Footer Area-->
+<footer id="footer-area">
+
+    <p class='footer-font'>Created by <a class='footer-link'
+                                         href='https://disappster.atlassian.net/wiki/spaces/COMP30830/pages/164009/Team+Member+Contact+List'>Disappster</a>
+        - COMP30830</p>
+    <div class="clear"></div>
+
+</footer>
+<!--END: Footer Area-->
 
 
+<!--BEGIN: GOOGLE ASYNC at END OF DOM ELEMENTS IN BODY-->
 <script
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC9btECtY48D3C-qx36Lt0gmUQK9XlYkM0&callback=initMap&libraries=&v=weekly"
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDbU4W2J29Zz3Jz8gkcgImNj4YRwgLZCoQ&callback=initMap&libraries=places,geometry&v=weekly"
         async>
-
+    // AR_API:
+    // https://maps.googleapis.com/maps/api/js?key=AIzaSyC9btECtY48D3C-qx36Lt0gmUQK9XlYkM0&callback=initMap&libraries=&v=weekly
+    // JS_API:
+    // https://maps.googleapis.com/maps/api/js?key=AIzaSyDbU4W2J29Zz3Jz8gkcgImNj4YRwgLZCoQ&callback=initMap&libraries=&v=weekly
 </script>
+<!--END: GOOGLE ASYNC at END OF DOM ELEMENTS IN BODY-->
+
+</body>
 
 </html>
