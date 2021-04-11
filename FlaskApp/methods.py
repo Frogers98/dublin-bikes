@@ -23,8 +23,8 @@ import nltk as nl
 import sklearn as sk
 import matplotlib as mp
 import xgboost as xg
-import pymc3 as pymc
-import sympy as sym
+#import pymc3 as pymc
+#import sympy as sym
 
 from sklearn.model_selection import train_test_split, KFold, cross_val_score, GridSearchCV
 from sklearn.metrics import mean_squared_error, accuracy_score, precision_score, recall_score
