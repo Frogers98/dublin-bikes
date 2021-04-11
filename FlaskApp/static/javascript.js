@@ -22,6 +22,7 @@ let markersArray = [];
 let geoJson = {};
 geoJson["type"] = "FeatureCollection";
 geoJson["features"] = [];
+let enteredLocationMarker;
 
 let directionsService;
 let directionsRenderer;
@@ -107,17 +108,12 @@ function initMap() {
         {
             center: {lat: 53.349804, lng: -6.260310},
             zoom: 13.5,
-            // markersArray: [], // Array to hold all markers
         });
 
     map.setOptions({styles: styleArray});
 
     directionsRenderer.setMap(map);
-    // directionsRenderer.setPanel(document.getElementById("right-panel"));
     directionsRenderer.setPanel(document.getElementById("directionsPanel"));
-
-    // const directionsDisplay = document.getElementById("directionsPanel")
-    // map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(directionsDisplay);
 
     fetch("/stations")
         .then(
@@ -268,7 +264,7 @@ function initMap() {
             // Create autocomplete input box
             autocomplete = new google.maps.places.Autocomplete(input, options);
             autocomplete.bindTo("bounds", map);
-            const enteredLocationMarker = new google.maps.Marker({map: map});
+            enteredLocationMarker = new google.maps.Marker({map: map});
             enteredLocationMarker.setVisible(false);
             let enteredLocation = map.getCenter();
 
@@ -295,8 +291,6 @@ function initMap() {
                 const rankedStations = await calculateDistances(map.data, enteredLocation);
                 showStationsList(map.data, rankedStations, enteredLocation);
             });
-
-            //Add event lis
 
         }).catch(
         err => {
@@ -392,11 +386,6 @@ function showStationsList(data, stations, originLocation) {
         console.log("empty stations list");
         return;
     }
-    // let panel = document.getElementById("side_panel_default");
-    // // panel.style.display = "block";
-    //
-    // hideCharts("stationSelector", "showAll");
-    //
 
     const nearestStationTable = document.getElementById("nearestStationHolder");
 
@@ -421,12 +410,12 @@ function showStationsList(data, stations, originLocation) {
         });
         // document.getElementById("nearestStationHolder").appendChild(stationNameRow);
         const stationNameCell = stationNameRow.insertCell();
-        stationNameCell.innerHTML = currentStationName;
+        stationNameCell.innerHTML = currentStationName + " " + currentStationDistText;
 
-        const walkingDistRow = nearestStationTable.insertRow();
-        walkingDistRow.setAttribute("id", "walkingDistRow");
-        const walkingDistCell = walkingDistRow.insertCell();
-        walkingDistCell.innerHTML = "Walking distance: " + currentStationDistText;
+        // const walkingDistRow = nearestStationTable.insertRow();
+        // walkingDistRow.setAttribute("id", "walkingDistRow");
+        // const walkingDistCell = walkingDistRow.insertCell();
+        // walkingDistCell.innerHTML = "Walking distance: " + currentStationDistText;
 
         const availBikesRow = nearestStationTable.insertRow();
         availBikesRow.setAttribute("id", "availBikesRow");
@@ -526,12 +515,16 @@ function filterColours(markerColour) {
 
 function showChartHolder(stationNumber) {
     if (stationNumber != "showAll") {
-        document.getElementById('chartHolder').style.display = "block";
+        document.getElementById("chartHolder").classList.remove("displayNone");
+        document.getElementById("predictionSelector").classList.remove("displayNone");
+        document.getElementById("predictionOutput").classList.remove("displayNone");
     } else {
         // Zoom out and recentre
-        map.setZoom(13);
-        map.panTo({lat: 53.349804, lng: -6.260310});
-        document.getElementById('chartHolder').style.display = "none";
+        resetMap();
+        document.getElementById("chartHolder").classList.add("displayNone");
+        document.getElementById("predictionSelector").classList.add("displayNone");
+        document.getElementById("predictionOutput").classList.add("displayNone");
+
     }
 }
 
@@ -540,7 +533,7 @@ function graphDailyInfo(stationNumber, stationName) {
     console.log("IN graphDailyINfo Station number is: " + stationNumber)
 
     console.log("Station info for station" + stationNumber)
-    // Clear the div so the backhround image of a loading spinner can be seen
+    // Clear the div so the background image of a loading spinner can be seen
     document.getElementById("chart1").innerHTML = "";
     // Fetch the data
     fetch(`single_station_availability_stat_by_date/${stationNumber}`).then(
@@ -574,12 +567,65 @@ function graphDailyInfo(stationNumber, stationName) {
         });
 }
 
+function displayDate() {
+    const today = new Date();
+    const days = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday'
+    ]
+    const months = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December'
+    ]
+
+    const currentYear = today.getFullYear();
+    const currentMonth = months[today.getMonth()];
+    const currentDate = today.getDate();
+    const currentDay = days[today.getDay()];
+
+    const formattedDate = new String(currentDate + " " + currentMonth + " " + currentYear)
+
+    document.getElementById("displayDay").textContent = currentDay;
+    document.getElementById("displayDate").textContent = formattedDate;
+}
+
+function displayWeather() {
+    fetch("/current_weather").then(
+        response => {
+            return response.json();
+        }).then(
+            data => {
+                console.log(data[0]["main"])
+                document.getElementById("displayWeatherType").textContent = "Weather conditions in Dublin: " + data[0]["main"];
+                const weatherIcon = document.createElement("img");
+                weatherIcon.src = data[0]["icon_url"];
+                weatherIcon.setAttribute("id", "icon");
+                document.getElementById("displayWeatherIcon").appendChild(weatherIcon);
+
+            })
+}
+
 function graphHourlyInfo(stationNumber, stationName) {
     // Function to graph the average availability by hour for a clicked station
     console.log("IN graphHourlyINfo Station number is: " + stationNumber)
 
     console.log("Station info for station" + stationNumber)
-    // Clear the div so the backhround image of a loading spinner can be seen
+    // Clear the div so the background image of a loading spinner can be seen
     document.getElementById("chart2").innerHTML = "";
     // Fetch the data
     fetch(`single_station_availability_stat_by_hourno/${stationNumber}`).then(
@@ -681,7 +727,45 @@ function getAvailabilityPrediction(stationNumber, requestedDate, requestedTime) 
             // We can now pass this output back to our html
             document.getElementById("predictionOutput").innerHTML = `There should be ${prediction} bikes at this station at ${prediction_request}`
         });
+}
 
+function resetMap() {
+    // Reset to default view
+    map.setZoom(13.5);
+    map.panTo({lat: 53.349804, lng: -6.260310});
+
+    markersArray.forEach(marker => {
+        marker.infowindow.close(map, marker);
+        marker.setVisible(true);
+    });
+
+    enteredLocationMarker.setVisible(false);
+    directionsRenderer.set('directions', null);
+    document.getElementById("directionsPanel").style.display = "none";
+}
+
+function openTab(tabValue, buttonValue) {
+    // Reset when switching tabs
+    resetMap();
+
+    let tabArray = ["sidePanelDefault", "availabilityDiv", "nearestStationDiv"];
+    let buttonArray = ["homeBtn", "availBtn", "nearBtn"];
+
+    tabArray.forEach(tab => {
+        if (tab == tabValue) {
+            document.getElementById(tab).classList.remove("displayNone");
+        } else {
+            document.getElementById(tab).classList.add("displayNone");
+        }
+    });
+
+    buttonArray.forEach(button => {
+        if (button == buttonValue) {
+            document.getElementById(button).classList.add("active");
+        } else {
+            document.getElementById(button).classList.remove("active");
+        }
+    })
 }
 
 function addDays(date, days) {

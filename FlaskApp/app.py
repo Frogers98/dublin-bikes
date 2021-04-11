@@ -35,11 +35,11 @@ app = Flask(__name__)
 #02.DEFINE DATABASE CONNECTION
 ####--------------------------------------
 
-myhost=ar_database_dictionary['endpoint']
-myuser=ar_database_dictionary['username']
-mypassword=ar_database_dictionary['password']
-myport=ar_database_dictionary['port']
-mydb=ar_database_dictionary['database']
+# myhost=ar_database_dictionary['endpoint']
+# myuser=ar_database_dictionary['username']
+# mypassword=ar_database_dictionary['password']
+# myport=ar_database_dictionary['port']
+# mydb=ar_database_dictionary['database']
 
 # myhost=fr_database_dictionary['endpoint']
 # myuser=fr_database_dictionary['username']
@@ -47,11 +47,11 @@ mydb=ar_database_dictionary['database']
 # myport=fr_database_dictionary['port']
 # mydb=fr_database_dictionary['database']
 
-# myhost=js_database_dictionary['endpoint']
-# myuser=js_database_dictionary['username']
-# mypassword=js_database_dictionary['password']
-# myport=js_database_dictionary['port']
-# mydb=js_database_dictionary['database']
+myhost=js_database_dictionary['endpoint']
+myuser=js_database_dictionary['username']
+mypassword=js_database_dictionary['password']
+myport=js_database_dictionary['port']
+mydb=js_database_dictionary['database']
 
 
 ####--------------------------------------
@@ -121,6 +121,17 @@ def availability_request():
     result=station_availability_last_update_table_df(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
     
     return result
+
+@app.route("/current_weather")
+def current_weather_request():
+    """Returns JSON string of current weather-type and weather-icon"""
+
+    result=weather_last_update_df(host=myhost,user=myuser,password=mypassword,port=myport,db=mydb)
+    weather_desc=result[["main", "icon_url"]]
+    weather_mode=weather_desc.mode()
+    weather_mode=weather_mode.to_json(orient="records")
+
+    return weather_mode
 
 
 ###----ROUTES FOR ANALYTICS----####
