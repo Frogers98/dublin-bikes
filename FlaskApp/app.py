@@ -19,8 +19,8 @@
 import pandas as pd
 import datetime as dt
 from flask import Flask, render_template
-from methods import *
-from data_dictionary import fr_database_dictionary, ar_database_dictionary, js_database_dictionary
+from FlaskApp.methods import *
+from FlaskApp.data_dictionary import fr_database_dictionary, ar_database_dictionary, js_database_dictionary
 
 
 

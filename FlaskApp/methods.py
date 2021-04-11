@@ -72,10 +72,8 @@ import matplotlib as mp
 import matplotlib.pyplot as plt
 
 #BeExplicit
-from data_dictionary import services_dictionary
-from data_dictionary import ar_database_dictionary
-from data_dictionary import database_schema
-from sql import *
+from FlaskApp.data_dictionary import *
+from FlaskApp.sql import *
 
 
 
