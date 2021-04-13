@@ -555,6 +555,7 @@ function graphDailyInfo(stationNumber, stationName) {
                 title: `Average availability by day for ${stationName}`,
                 vAxis: {title: "Number of bikes available"},
                 hAxis: {title: "Date"},
+                legend: {position: 'none'}
             };
             // Load the chart object from the api
             var chart_data = new google.visualization.DataTable();
@@ -653,6 +654,7 @@ function graphHourlyInfo(stationNumber, stationName) {
                 title: `Average availability by hour for ${stationName}`,
                 vAxis: {title: "Number of bikes available"},
                 hAxis: {title: "Hour"},
+                legend: {position: 'none'}
             };
             // Load the chart object from the api
             var chart_data = new google.visualization.DataTable();
