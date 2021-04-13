@@ -53,7 +53,6 @@ gast==0.3.3
 google-auth==1.16.0
 google-auth-oauthlib==0.4.1
 google-pasta==0.2.0
-grpcio==1.29.0
 h5py==2.10.0
 idna==2.9
 ipykernel==5.4.3
@@ -82,7 +81,6 @@ mistune==0.8.4
 mpmath==1.2.1
 mysql-client==0.0.1
 mysql-connector==2.2.9
-mysqlclient==2.0.3
 nbclient==0.5.0
 nbconvert==6.0.6
 nbformat==5.0.7
@@ -90,11 +88,10 @@ nest-asyncio==1.4.0
 netCDF4==1.5.6
 nltk==3.5
 notebook==6.1.4
-numpy==1.18.4
 oauthlib==3.1.0
 opt-einsum==3.2.1
 packaging==20.4
-pandas==1.2.1
+pandas
 pandocfilters==1.4.2
 parso==0.7.1
 patsy==0.5.1
@@ -150,14 +147,11 @@ systemInfo==0.2
 tdqm==0.0.1
 tensorboard==2.2.2
 tensorboard-plugin-wit==1.6.0.post3
-tensorflow==2.2.0
-tensorflow-estimator==2.2.0
 termcolor==1.1.0
 terminado==0.9.1
 testpath==0.4.4
 Theano-PyMC==1.1.2
 threadpoolctl==2.1.0
-tika==1.24
 toml==0.10.1
 tornado==6.0.4
 tqdm==4.46.0
