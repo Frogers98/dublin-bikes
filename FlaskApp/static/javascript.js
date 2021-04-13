@@ -211,6 +211,7 @@ function initMap() {
                         showChartHolder(marker.number);
                         graphDailyInfo(marker.number, marker.name);
                         graphHourlyInfo(marker.number, marker.name);
+                        openTab('availabilityDiv', 'availBtn');
 
                         // Dynamically set the min and max date for requesting predicted availability
                         // The min will be set to today and the max will be set for 5 days from now
@@ -533,8 +534,12 @@ function graphDailyInfo(stationNumber, stationName) {
     console.log("IN graphDailyINfo Station number is: " + stationNumber)
 
     console.log("Station info for station" + stationNumber)
-    // Clear the div so the background image of a loading spinner can be seen
-    document.getElementById("chart1").innerHTML = "";
+
+    // Load an ajax spinner while waiting
+    var loadingGif = document.createElement('LoadingGif');
+    loadingGif.src = "url('../static/ajax-loader.gif'";
+    document.getElementById('chart1').appendChild(loadingGif);
+
     // Fetch the data
     fetch(`single_station_availability_stat_by_date/${stationNumber}`).then(
         response => {
@@ -560,6 +565,8 @@ function graphDailyInfo(stationNumber, stationName) {
             data.forEach(entry => {
                 chart_data.addRow([new Date(entry.created_date_date), parseInt(entry.available_bikes)])
             })
+            // Clear the div to get rid of the loading spinner before loading the chart
+            document.getElementById('chart1').innerHTML = "";
             // Specify where the chart will be drawn and draw it
             var chart = new google.visualization.ColumnChart(document.getElementById('chart1'));
             chart.draw(chart_data, options);
@@ -625,8 +632,12 @@ function graphHourlyInfo(stationNumber, stationName) {
     console.log("IN graphHourlyINfo Station number is: " + stationNumber)
 
     console.log("Station info for station" + stationNumber)
-    // Clear the div so the background image of a loading spinner can be seen
-    document.getElementById("chart2").innerHTML = "";
+
+     // Load an ajax spinner while waiting for the fetch request to complete
+    var loadingGif = document.createElement('LoadingGif');
+    loadingGif.src = "url('../static/ajax-loader.gif'";
+    document.getElementById('chart1').appendChild(loadingGif);
+
     // Fetch the data
     fetch(`single_station_availability_stat_by_hourno/${stationNumber}`).then(
         response => {
@@ -652,6 +663,8 @@ function graphHourlyInfo(stationNumber, stationName) {
             data.forEach(entry => {
                 chart_data.addRow([entry.created_date_hourno, parseInt(entry.available_bikes)])
             })
+            // Clear the div to get rid of the loading spinner before displaying the map
+            document.getElementById('chart2').innerHTML = "";
             // Specify where the chart will be drawn and draw it
             var chart = new google.visualization.ColumnChart(document.getElementById('chart2'));
             chart.draw(chart_data, options);

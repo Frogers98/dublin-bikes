@@ -448,12 +448,15 @@ a:active {
     clear: both;
 }
 
-/*  Adds a background spinner to all charts */
+/*  CSS for the loading spinner for the charts */
 .charts {
-    background-image: url('../static/ajax-loader.gif');
-    background-repeat:no-repeat;
-    background-position: center center;
+    display: table-cell;
+    height: 300px;
+    text-align: center;
+    width: 300px;
+    vertical-align: middle;
 }
+
 /*  Wrapper - Tutorial 3 Solution*/
 .wrapper {
     margin: 0 auto;
