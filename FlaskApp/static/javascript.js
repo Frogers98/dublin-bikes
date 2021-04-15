@@ -199,12 +199,11 @@ function initMap() {
                         });
 
                         map.panTo(marker.position);
-                        openTab('availabilityDiv', 'availBtn');
                         this.infowindow.open(map, marker);
                         showChartHolder(marker.number);
                         graphDailyInfo(marker.number, marker.name);
                         graphHourlyInfo(marker.number, marker.name);
-
+                        // openTab('availabilityDiv', 'availBtn');
 
                         // Dynamically set the min and max date for requesting predicted availability
                         // The min will be set to today and the max will be set for 5 days from now
@@ -384,6 +383,7 @@ function showStationsList(data, stations, originLocation) {
         nearestStationTable.removeChild(nearestStationTable.lastChild);
     }
 
+    // Create table to display 5 nearest stations
     for (var i = 0; i < 5; i++) {
         const currentStationObject = stations[i];
         const currentStationNumber = currentStationObject.stationNumber;
@@ -396,30 +396,41 @@ function showStationsList(data, stations, originLocation) {
 
         const stationNameRow = nearestStationTable.insertRow();
         stationNameRow.setAttribute("id", "stationNameRow");
-        stationNameRow.addEventListener("click", function () {
-            nearestStationInfo(currentStationNumber);
-        });
-
         const stationNameCell = stationNameRow.insertCell();
-        stationNameCell.innerHTML = "<span id='stationNameCell'>" + currentStationName + " " + currentStationDistText + " </span><span id='viewStationLink'>View on map</span>";
+        stationNameCell.setAttribute("id", "stationNameCell");
+        stationNameCell.setAttribute("colspan", "2");
+        stationNameCell.innerHTML = currentStationName + " " + currentStationDistText;
 
         const availBikesRow = nearestStationTable.insertRow();
         availBikesRow.setAttribute("id", "availBikesRow");
         const availBikesCell = availBikesRow.insertCell();
+        availBikesCell.setAttribute("id", "availBikesCell");
+        availBikesCell.setAttribute("colspan", "2");
         availBikesCell.innerHTML = "Available bikes: " + currentStationBikes;
 
         const availStandsRow = nearestStationTable.insertRow();
         availStandsRow.setAttribute("id", "availStandsRow");
         const availStandsCell = availStandsRow.insertCell();
+        availStandsCell.setAttribute("id", "availStandsCell");
+        availStandsCell.setAttribute("colspan", "2");
         availStandsCell.innerHTML = "Available stands: " + currentStationStands;
 
         const getDirectionsRow = nearestStationTable.insertRow();
         getDirectionsRow.setAttribute("id", "getDirectionsRow");
-        getDirectionsRow.addEventListener("click", function () {
+
+        const getDirectionsCell = getDirectionsRow.insertCell();
+        getDirectionsCell.setAttribute("id", "getDirectionsCell")
+        getDirectionsCell.addEventListener("click", function () {
             calculateAndDisplayRoute(originLocation, stationLatLng)
         });
-        const getDirectionsCell = getDirectionsRow.insertCell();
-        getDirectionsCell.innerHTML = "Get directions";
+        getDirectionsCell.innerHTML = "Get Directions";
+
+        const viewOnMapCell = getDirectionsRow.insertCell();
+        viewOnMapCell.setAttribute("id", "viewOnMapCell");
+        viewOnMapCell.addEventListener("click", function () {
+            nearestStationInfo(currentStationNumber);
+        });
+        viewOnMapCell.innerHTML = "View on Map";
     }
 }
 
@@ -529,7 +540,8 @@ function graphDailyInfo(stationNumber, stationName) {
                 title: `Average availability by day for ${stationName}`,
                 vAxis: {title: "Number of bikes available"},
                 hAxis: {title: "Date"},
-                legend: {position: 'none'}
+                legend: {position: 'none'},
+                backgroundColor: { fill: "#c8ecc8" },
             };
             // Load the chart object from the api
             var chart_data = new google.visualization.DataTable();
@@ -625,7 +637,8 @@ function graphHourlyInfo(stationNumber, stationName) {
                 title: `Average availability by hour for ${stationName}`,
                 vAxis: {title: "Number of bikes available"},
                 hAxis: {title: "Hour"},
-                legend: {position: 'none'}
+                legend: {position: 'none'},
+                backgroundColor: { fill: "#c8ecc8" },
             };
             // Load the chart object from the api
             var chart_data = new google.visualization.DataTable();
@@ -644,18 +657,6 @@ function graphHourlyInfo(stationNumber, stationName) {
 
         });
 }
-
-// Reset chart/station info when location is entered, maybe not the most efficient approach
-// function hideCharts(id, valueToSelect) {
-//     let targetSelect = document.getElementById(id);
-//     targetSelect.value = valueToSelect;
-//     showChartHolder(valueToSelect);
-//     for (let i = 0; i < markersArray.length; i++) {
-//         let currentMarker = markersArray[i];
-//         currentMarker.setVisible(true);
-//         currentMarker.infowindow.close();
-//     }
-// }
 
 function nearestStationInfo(stationNumber) {
     // Open marker info-window when user selects station from list of nearest stations
