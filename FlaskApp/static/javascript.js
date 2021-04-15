@@ -123,21 +123,14 @@ function initMap() {
         ).then(
         data => {
 
-            console.log("Data: ", data);
-
             /*This section is here because the silly CSS section wouldn't set the height until the map had been initialised */
             var body = document.body;
             var html = document.documentElement;
             var height = (0.85) * (Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight));
 
-            // console.log("Map data is: ", map);
-
             data.forEach(
                 station => {
-                    //var numAvailableBikes = String(station.available_bikes);
                     var cr_datetime = new Date(station.created_date).toLocaleString('en-ie');
-                    // console.log(station.name, "Timestamp: ", cr_datetime);
-                    console.log(station.position_lat);
 
                     // Create geoJSON features for distance matrix
                     var newFeature = {
@@ -194,7 +187,6 @@ function initMap() {
                             available_stands: station.available_bike_stands,
                             icon: determineAvailabilityPercent(station.available_bikes, station.available_bike_stands),
                             map: map,
-                            //label: numAvailableBikes,
                             infowindow: station_info_window,
                         }
                     );
@@ -250,6 +242,7 @@ function initMap() {
                     });
                 });
 
+            //Add geo JSON to map data
             map.data.addGeoJson(geoJson, {idPropertyName: "number"});
             // Duplicate markers added, hiding these
             map.data.setStyle({visible: false});
@@ -271,9 +264,11 @@ function initMap() {
 
             // Event when entered location changes - pan to new location, update listed stations
             autocomplete.addListener("place_changed", async () => {
+                document.getElementById("directionsPanel").style.display = "none";
                 enteredLocationMarker.setVisible(false);
                 enteredLocation = map.getCenter();
                 const place = autocomplete.getPlace();
+
 
                 if (!place.geometry || !place.geometry.location) {
                     window.alert("No details available for input: '" + place.name + "'");
@@ -281,10 +276,8 @@ function initMap() {
                 }
 
                 enteredLocation = place.geometry.location;
-                console.log("ORIGIN LOCATION", enteredLocation.lat(), enteredLocation.lng());
                 map.setCenter(enteredLocation);
                 map.setZoom(15);
-                // console.log(place)
 
                 enteredLocationMarker.setPosition(enteredLocation);
                 enteredLocationMarker.setVisible(true);
@@ -303,7 +296,6 @@ async function calculateDistances(data, origin) {
 
     // Distance matrix used to calculate walking distance between location entered and nearest stations
     const originLatLng = new google.maps.LatLng(origin.lat(), origin.lng());
-    console.log("ORIGIN LATLNG", originLatLng.lat(), originLatLng.lng());
 
     const stations = [];
     const destinations = [];
@@ -312,9 +304,9 @@ async function calculateDistances(data, origin) {
     data.forEach((station) => {
         const stationNum = station.getProperty("number");
         const stationLatLng = station.getGeometry().get();
-        // console.log("STATION LATLNG", stationLatLng.lat(), stationLatLng.lng())
 
-        // Distance matrix only works for up to 25 destinations, narrowing down stations
+        // Distance matrix only works for up to 25 destinations
+        //Narrowing down stations by calculating straight line distance between
         const distanceBetween = google.maps.geometry.spherical.computeDistanceBetween(stationLatLng, originLatLng);
 
         const stationDistance = {
@@ -326,21 +318,18 @@ async function calculateDistances(data, origin) {
         stationDistances.push(stationDistance);
     });
 
+    // Sorting by smallest straight line distance between
     stationDistances.sort((first, second) => {
         return first.stationDist - second.stationDist;
     });
 
+    // 10 stations with smallest straight line distance between will be passed to the Distance Matrix
     const slicedDistances = stationDistances.slice(0, 10);
-    console.log("NEW ARRAY LENGTH", slicedDistances.length);
-    console.log("CLOSEST", stationDistances[0]);
 
     slicedDistances.forEach((station) => {
         stations.push(station.stationNumber);
         destinations.push(station.stationGEOM);
     });
-
-    console.log(stations.length);
-    console.log(destinations.length);
 
     const service = new google.maps.DistanceMatrixService();
     const getDistanceMatrix =
@@ -409,14 +398,9 @@ function showStationsList(data, stations, originLocation) {
         stationNameRow.addEventListener("click", function () {
             nearestStationInfo(currentStationNumber);
         });
-        // document.getElementById("nearestStationHolder").appendChild(stationNameRow);
-        const stationNameCell = stationNameRow.insertCell();
-        stationNameCell.innerHTML = currentStationName + " " + currentStationDistText;
 
-        // const walkingDistRow = nearestStationTable.insertRow();
-        // walkingDistRow.setAttribute("id", "walkingDistRow");
-        // const walkingDistCell = walkingDistRow.insertCell();
-        // walkingDistCell.innerHTML = "Walking distance: " + currentStationDistText;
+        const stationNameCell = stationNameRow.insertCell();
+        stationNameCell.innerHTML = "<span id='stationNameCell'>" + currentStationName + " " + currentStationDistText + " </span><span id='viewStationLink'>View on map</span>";
 
         const availBikesRow = nearestStationTable.insertRow();
         availBikesRow.setAttribute("id", "availBikesRow");
@@ -440,10 +424,6 @@ function showStationsList(data, stations, originLocation) {
 
 function filterMarkers(markerNumber) {
     // Function to make all markers but the selected marker invisible
-    console.log("In filters marker function");
-
-    console.log("selected marker is: " + markerNumber);
-
     // Loop through all the markers
     for (let i = 0; i < markersArray.length; i++) {
 
@@ -458,7 +438,6 @@ function filterMarkers(markerNumber) {
 
         // Make all markers but the selected marker invisible
         else if (markerNumber == currentMarker.number) {
-            console.log("Marker found!");
             currentMarker.setVisible(true);
             google.maps.event.trigger(currentMarker, 'click');
         } else {
@@ -531,10 +510,6 @@ function showChartHolder(stationNumber) {
 
 function graphDailyInfo(stationNumber, stationName) {
     // Function to graph the average availability by day for a clicked station
-    console.log("IN graphDailyINfo Station number is: " + stationNumber)
-
-    console.log("Station info for station" + stationNumber)
-
     // Load an ajax spinner while waiting
     var loadingGif = document.createElement('LoadingGif');
     loadingGif.src = "url('../static/ajax-loader.gif'";
@@ -547,8 +522,6 @@ function graphDailyInfo(stationNumber, stationName) {
         }
     ).then(
         data => {
-            console.log("data for this station is:");
-            console.log(data);
 
             // Info for the graph such as title
             var options = {
@@ -575,7 +548,9 @@ function graphDailyInfo(stationNumber, stationName) {
         });
 }
 
+
 function displayDate() {
+    // Fucntion will be called on page load to display current time and date in side-panel
     const today = new Date();
     const days = [
         'Sunday',
@@ -612,7 +587,9 @@ function displayDate() {
     document.getElementById("displayDate").textContent = formattedDate;
 }
 
+
 function displayWeather() {
+    // Function will be called on page load to display current weather type and weather icon in side-panel
     fetch("/current_weather").then(
         response => {
             return response.json();
@@ -630,10 +607,6 @@ function displayWeather() {
 
 function graphHourlyInfo(stationNumber, stationName) {
     // Function to graph the average availability by hour for a clicked station
-    console.log("IN graphHourlyINfo Station number is: " + stationNumber)
-
-    console.log("Station info for station" + stationNumber)
-
      // Load an ajax spinner while waiting for the fetch request to complete
     var loadingGif = document.createElement('LoadingGif');
     loadingGif.src = "url('../static/ajax-loader.gif'";
@@ -646,9 +619,6 @@ function graphHourlyInfo(stationNumber, stationName) {
         }
     ).then(
         data => {
-            console.log("data for this station is:");
-            console.log(data);
-
             // Info for the graph such as title
             var options = {
                 title: `Average availability by hour for ${stationName}`,
@@ -675,18 +645,19 @@ function graphHourlyInfo(stationNumber, stationName) {
 }
 
 // Reset chart/station info when location is entered, maybe not the most efficient approach
-function hideCharts(id, valueToSelect) {
-    let targetSelect = document.getElementById(id);
-    targetSelect.value = valueToSelect;
-    showChartHolder(valueToSelect);
-    for (let i = 0; i < markersArray.length; i++) {
-        let currentMarker = markersArray[i];
-        currentMarker.setVisible(true);
-        currentMarker.infowindow.close();
-    }
-}
+// function hideCharts(id, valueToSelect) {
+//     let targetSelect = document.getElementById(id);
+//     targetSelect.value = valueToSelect;
+//     showChartHolder(valueToSelect);
+//     for (let i = 0; i < markersArray.length; i++) {
+//         let currentMarker = markersArray[i];
+//         currentMarker.setVisible(true);
+//         currentMarker.infowindow.close();
+//     }
+// }
 
 function nearestStationInfo(stationNumber) {
+    // Open marker info-window when user selects station from list of nearest stations
     directionsRenderer.set('directions', null);
     for (let i = 0; i < markersArray.length; i++) {
         let currentMarker = markersArray[i];
@@ -699,6 +670,7 @@ function nearestStationInfo(stationNumber) {
 }
 
 function calculateAndDisplayRoute(originLocation, stationLocation) {
+    // Function will be called to display route and fill directions panel when user clicks get directions
     directionsService.route(
         {
             origin: originLocation,
@@ -745,7 +717,7 @@ function getAvailabilityPrediction(stationNumber, requestedDate, requestedTime) 
 }
 
 function resetMap() {
-    // Reset to default view
+    // Function will be called to reset map to default view
     map.setZoom(13.5);
     map.panTo({lat: 53.349804, lng: -6.260310});
 
@@ -760,7 +732,7 @@ function resetMap() {
 }
 
 function openTab(tabValue, buttonValue) {
-    // Reset when switching tabs
+    // Function will be called to change side-panel contents and tab appearance on tab selection
     resetMap();
 
     let tabArray = ["sidePanelDefault", "availabilityDiv", "nearestStationDiv"];
