@@ -199,11 +199,12 @@ function initMap() {
                         });
 
                         map.panTo(marker.position);
+                        openTab('availabilityDiv', 'availBtn');
                         this.infowindow.open(map, marker);
                         showChartHolder(marker.number);
                         graphDailyInfo(marker.number, marker.name);
                         graphHourlyInfo(marker.number, marker.name);
-                        openTab('availabilityDiv', 'availBtn');
+
 
                         // Dynamically set the min and max date for requesting predicted availability
                         // The min will be set to today and the max will be set for 5 days from now
