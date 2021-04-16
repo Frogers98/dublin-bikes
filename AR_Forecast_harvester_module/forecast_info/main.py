@@ -436,7 +436,7 @@ def getWeatherForecast(latitude, longitude):
     """Function to return the weather forecast for certain co-ordinates"""
     weather_key = services_dictionary['OpenWeatherMapForecast']['API Key']
     endpoint=services_dictionary['OpenWeatherMapForecast']['Endpoint']['weather_at_coord']
-    r = requests.get(endpoint, params={"APPID": weather_key, "lat": latitude, "lon": longitude})
+    r = rq.get(endpoint, params={"APPID": weather_key, "lat": latitude, "lon": longitude})
     return r.json()
 
 ####--------------------------------------

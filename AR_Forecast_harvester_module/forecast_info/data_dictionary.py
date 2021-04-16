@@ -90,8 +90,6 @@ database_schema={
                                 }
 
                     ,'01_forecast':{
-        # Removed base, timezone, avail_update_dt, datetime, id_var, name, cod and all 'sys' entries when compared to original scraper
-        # Added forecast_time_dt and forecast_time_txt to show the forecast times in readable format
                                 'number': 'INT'
                                 ,'position_long':'REAL'
                                 ,'position_lat':'REAL'
@@ -110,8 +108,8 @@ database_schema={
                                 ,'wind_speed':'REAL'
                                 ,'wind_degree':'INT'
                                 ,'clouds_all':'INT'
-                                ,'forecast_time_dt':'BIGINT'
-                                ,'forecast_time_txt':'VARCHAR(200)'
+                                ,'forecast_time_ts':'BIGINT'
+                                ,'forecast_time_dt':'DATETIME'
                                 ,'created_date':'BIGINT'
                                 }
     
@@ -132,6 +130,9 @@ database_schema={
                                ,  'weather_humidity':'REAL' #average over everything
                                 , 'weather_air_pressure':'REAL' #average over everything
                                 , 'created_date':'BIGINT'
+                                ,'minute':'INTEGER'
+                                ,'month':'INTEGER'
+                                ,'year':'INTEGER'
                                 }
     
 ,                   '02_station_avail_weather_test':{
@@ -151,10 +152,13 @@ database_schema={
                                 , 'weather_humidity':'REAL' #average over everything
                                 , 'weather_air_pressure':'REAL' #average over everything
                                 , 'created_date':'BIGINT'
+                                ,'minute':'INTEGER'
+                                ,'month':'INTEGER'
+                                ,'year':'INTEGER'
                                 }
     
     ,                   '03_user_model_entry':{
-                                'prediction_id':'INTEGER'
+                                'prediction_id':'INTEGER NOT NULL AUTO_INCREMENT'
                                 ,'number':'INTEGER'
                                 , 'weather_type_id':'INTEGER'
                                 , 'hour':'INTEGER'
@@ -175,6 +179,9 @@ database_schema={
                                 , 'predicted_date':'BIGINT'
                                 , 'model_type':'VARCHAR(100)'
                                 , 'bool_correct_prediction':'BOOLEAN'
+                                ,'minute':'INTEGER'
+                                ,'month':'INTEGER'
+                                ,'year':'INTEGER'
                                 }
                 }
 
