@@ -526,6 +526,9 @@ function showChartHolder(stationNumber) {
 
 function graphDailyInfo(stationNumber, stationName) {
     // Function to graph the average availability by day for a clicked station
+
+    // First clear the div so the loading spinner can be seen
+    document.getElementById('chart1').innerHTML = "";
     // Load an ajax spinner while waiting
     var loadingGif = document.createElement('LoadingGif');
     loadingGif.src = "url('../static/ajax-loader.gif'";
@@ -624,6 +627,9 @@ function displayWeather() {
 
 function graphHourlyInfo(stationNumber, stationName) {
     // Function to graph the average availability by hour for a clicked station
+
+     // First clear the div so the loading spinner can be seen
+    document.getElementById('chart2').innerHTML = "";
      // Load an ajax spinner while waiting for the fetch request to complete
     var loadingGif = document.createElement('LoadingGif');
     loadingGif.src = "url('../static/ajax-loader.gif'";
