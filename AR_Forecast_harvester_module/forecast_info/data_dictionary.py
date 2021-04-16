@@ -223,6 +223,6 @@ services_dictionary={
                         ,'Endpoint':{
                                 'weather_at_coord':'http://api.openweathermap.org/data/2.5/forecast' #?lat={}&lon={}&appid={}
                                     }
-                        ,'API Key':'fa4a1ef5fe110a5b66dbe8f58890b6f1'
+                        ,'API Key':'100aa3194b208706dab0cfd7e8084b20'
                     },
                }
