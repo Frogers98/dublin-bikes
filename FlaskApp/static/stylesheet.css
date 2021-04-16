@@ -106,6 +106,14 @@ Note: Use CTRL+F and the Number with a dot to navigate to that section.
 
 /*--------- 3. Body styling -------------*/
 
+#stationInfoWindowPopupName{
+    font:bold;
+}
+
+.stationInfoWindowPopupName{
+    font:bold;
+}
+
 body {
     height: 100%;
     margin: 0;

@@ -153,18 +153,18 @@ function initMap() {
                     const station_info_window = new google.maps.InfoWindow(
                         {
                             content: "<h1 class='StationAvail'>" + station.name + "</h1>"
-                                + "<table class='StationClass'>"
+                                + "<table class='StationClass' align='center'>"
                                 + "<tr class='StationClassRow'>"
                                 + "<td class='StationClassDivider'>"
-                                + "<div class='StationInfoWindowPopupName'>Available Bikes</div>: " + station.available_bikes
+                                + "<div class='StationInfoWindowPopupName'><b>Available Bikes</b></div> " + station.available_bikes
                                 + "</td>"
                                 + "<td class='StationClassDivider'>"
-                                + "<div class='StationInfoWindowPopupName'>Available Stands</div>: " + station.available_bike_stands
+                                + "<div class='StationInfoWindowPopupName'><b>Available Stands</b></div> " + station.available_bike_stands
                                 + "</td>"
                                 + "</tr>"
                                 + "<tr class='StationClassRow'>"
                                 + "<td class='StationClassDivider'>"
-                                + "<div class='StationInfoWindowPopupName'>Last Updated</div>: " + cr_datetime
+                                + "<div class='StationInfoWindowPopupName'><b>Last Updated</b></div> " + cr_datetime
                                 + "</td>"
                                 + "</tr>"
                                 + "</table>",
