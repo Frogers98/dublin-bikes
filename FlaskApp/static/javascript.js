@@ -27,6 +27,7 @@ let enteredLocationMarker;
 let directionsService;
 let directionsRenderer;
 
+var currentlySelectedStationNo; // This is a global variable that will hold the station number of the currently selected station
 function initMap() {
     // Load google charts
     google.charts.load('current', {'packages': ['corechart']});
@@ -203,6 +204,8 @@ function initMap() {
                         showChartHolder(marker.number);
                         graphDailyInfo(marker.number, marker.name);
                         graphHourlyInfo(marker.number, marker.name);
+                        // Update the global variable to keep track of which marker was selected
+                        currentlySelectedStationNo = marker.number
                         // openTab('availabilityDiv', 'availBtn');
 
                         // Dynamically set the min and max date for requesting predicted availability
@@ -216,29 +219,6 @@ function initMap() {
                         var maxDay = addDays(new Date(), 5);
                         maxDay = maxDay.toISOString().split('T')[0]
                         document.getElementById("predictionDate").setAttribute('max', maxDay);
-
-
-                        // This will add the event listener for requesting predicted availability
-                        // Adapted from https://stackoverflow.com/questions/23640351/how-to-convert-html5-input-type-date-and-time-to-javascript-datetime
-                        // Leaving this here means that we can keep track of the clicked station
-                        // Only potential issue with this is if someone tries to click the button but hasn't already selected a station
-                        // In which case nothing will happen at all as this listener won't have been created yet.
-                        let predictionButton = document.getElementById("predictButton")
-                        // First we need to remove the initial onclick function we gave the button which was to display an error message
-                        // if clicked before selecting a station
-                        predictionButton.onclick = null;
-                        // Now we can add the new event listener to run a different function once the button is clicked
-                        predictionButton.addEventListener("click", function () {
-                            let predictionDate = document.getElementById("predictionDate").value;
-                            let predictionTime = document.getElementById("predictionTime").value;
-
-                            // console.log(prediction_request);
-                            // alert("This worked!, selected station was " + marker.name);
-
-                            // Pass the station number and the requested date/time to our function that will then request
-                            // The prediction from our ML model in the backend
-                            getAvailabilityPrediction(marker.number, predictionDate, predictionTime)
-                        });
                     });
                 });
 
@@ -291,6 +271,27 @@ function initMap() {
             console.log("Oops!", err);
         });
 }
+function addPredictButtonListener() {
+    // Function to add a listener to the predict button which will make it call a function which will then call another function
+    // Which will make the query to flask
+    console.log("IN PREDICT BUTTON LISTENER FUNCTION")
+    let predictionButton = document.getElementById("predictButton")
+    // First we need to remove the event listener or it will call the function multiple times
+    predictionButton.removeEventListener("click", callPredictFunction)
+    // Now we can add it again
+    predictionButton.addEventListener("click", callPredictFunction);
+}
+function callPredictFunction() {
+    // Function that's called when the prediction button is clicked. It will call the getAvailabilityPrediction function
+    // with the currently selected date, time and station number as arguments
+
+        let predictionDate = document.getElementById("predictionDate").value;
+        let predictionTime = document.getElementById("predictionTime").value;
+
+        // Pass the station number and the requested date/time to our function that will then request
+        // The prediction from our ML model in the backend
+        getAvailabilityPrediction(currentlySelectedStationNo, predictionDate, predictionTime)
+    }
 
 async function calculateDistances(data, origin) {
 
@@ -510,6 +511,9 @@ function showChartHolder(stationNumber) {
         document.getElementById("chartHolder").classList.remove("displayNone");
         document.getElementById("predictionSelector").classList.remove("displayNone");
         document.getElementById("predictionOutput").classList.remove("displayNone");
+        // This calls a function that adds an event listener to the predict button, updating it to make it's prediction call
+        // With the currently selected date, time and station number
+        addPredictButtonListener();
     } else {
         // Zoom out and recentre
         resetMap();
@@ -691,11 +695,6 @@ function calculateAndDisplayRoute(originLocation, stationLocation) {
     );
 }
 
-function NoStationPredictReq() {
-    // Function that will be called if the request prediction button is clicked before first clicking a station
-    alert("Please select a marker to view available prediction times.\nWe can only show predictions from between today and the next 5 days.")
-}
-
 function getAvailabilityPrediction(stationNumber, requestedDate, requestedTime) {
     console.log("In prediction function, station number is: " + stationNumber)
     console.log("Requested date is: " + requestedDate)
@@ -710,7 +709,9 @@ function getAvailabilityPrediction(stationNumber, requestedDate, requestedTime) 
         }
     ).then(
         prediction => {
-            console.log("This is where the prediction will go, instead of a prediction the station name is: " + prediction);
+            console.log("*******************************")
+            console.log("*******************************")
+            console.log(" station number is: " + stationNumber + " prediction is: "  + prediction);
             console.log("Requested time was " + prediction_request);
             //alert("This worked should see details in console!");
             // We can now pass this output back to our html
