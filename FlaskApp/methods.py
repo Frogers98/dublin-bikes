@@ -2311,6 +2311,7 @@ def predict_from_station_time(weather_data,station_number,timestamp):
 
     ###------
     staging_df=staging_df[keep_columns]
+    result=''
 
     print(staging_df.describe())
     
