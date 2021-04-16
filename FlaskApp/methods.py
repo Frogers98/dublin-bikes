@@ -1454,15 +1454,15 @@ def add_time_features(df, date_time_column):
                         
     #Poor Results:
     #df['quarter'] = df[date_time_column].dt.quarter
-    #df['month'] = df[date_time_column].dt.month
-    #df['year'] = df[date_time_column].dt.year
-    #df['minute'] = df[date_time_column].dt.minute
+    df['month'] = df[date_time_column].dt.month
+    df['year'] = df[date_time_column].dt.year
+    df['minute'] = df[date_time_column].dt.minute
     #df['weekofyear'] = df[date_time_column].dt.weekofyear
     #df=d#f.drop(date_time_column, axis=1)
 
     df=df.drop('dayofyear',axis=1)
     
-    return [df,['hour','dayofweek','dayofmonth','bool_weekend','bool_dayoff','bool_workhour','bool_commutehour','bool_night']]
+    return [df,['minute','hour','dayofweek','dayofmonth','month','year','bool_weekend','bool_dayoff','bool_workhour','bool_commutehour','bool_night']]
 
 
 def get_randomised_data(host,user,password,port,db,df,test_size=0.3):
@@ -1651,20 +1651,10 @@ def create_linear_model(fulldf,train_df,test_df,target_column,station_number,plo
         
     return [lin_regression_model,'','',pred_vs_act_df,rmse]
 
-###ADD IN SAVE TO TEST/TRAIN DB HERE
-def generate_models(raw_df,host,user,password,port,db, plot_comp=True,plot_tree=True):
-    """A function to generate models per station"""
+def generate_models(raw_df,host,user,password,port,db,plot_comp=True,plot_tree=True):
+    """A function to generate models per station. Be warned, with the usage of grid search for each station this takes about twelve to eighteen hours"""
         
-    engine_l=connect_db_engine(host,user,password,port,db)
-    engine=engine_l[1]
-
-    try:
-        #Try Clear the DB
-        engine.execute("""DELETE FROM 02_station_avail_weather_train WHERE 1=1""")
-        engine.execute("""DELETE FROM 02_station_avail_weather_test WHERE 1=1""")
-    except:
-        print('Cannot Remove')
-
+        
     #HardCoded inputs - NOT A GOOD PRACTICE
     
     #Update time column
@@ -1735,7 +1725,24 @@ def generate_models(raw_df,host,user,password,port,db, plot_comp=True,plot_tree=
                             }
     
     
-    
+            
+    engine_l=connect_db_engine(host,user,password,port,db)
+    engine=engine_l[1]
+
+    try:
+        #Try Clear the DB
+        
+        enable_delete_SQL="""SET SQL_SAFE_UPDATES = 0"""
+        disable_delete_SQL="""SET SQL_SAFE_UPDATES = 1"""
+
+        engine.execute(enable_delete_SQL)
+        
+        engine.execute("""DELETE FROM 02_station_avail_weather_train WHERE 1=1""")
+        engine.execute("""DELETE FROM 02_station_avail_weather_test WHERE 1=1""")
+        
+        engine.execute(disable_delete_SQL)
+    except:
+        print('Cannot Remove')
 
     #Staging Dataframe
     staging_df=raw_df.copy(deep=True)
@@ -1822,9 +1829,13 @@ def generate_models(raw_df,host,user,password,port,db, plot_comp=True,plot_tree=
     
     
     station_dataframe_model_list={}
+    
+
+    
+    
     datetime_now=dt.datetime.now()
     created_date=dt.datetime.timestamp(datetime_now)
-
+    
     #For each station in the list
     for station_number in staging_df['station_number'].sort_values().unique():
         print("---------------")
@@ -1878,8 +1889,14 @@ def generate_models(raw_df,host,user,password,port,db, plot_comp=True,plot_tree=
                     .dropna()
                 )
             
-
-            #This won't work - It needs to be a function 
+            
+            
+                
+            #One hot encoding of Weather Type
+            #station_dataframe=pd.get_dummies(station_dataframe, drop_first=True)
+            #station_train_df=pd.get_dummies(station_train_df, drop_first=True)
+            #station_test_df=pd.get_dummies(station_test_df, drop_first=True)
+            
             try:
                 #Don't touch the actual data
                 temp_train_df=station_train_df.copy(deep=True)
@@ -1903,12 +1920,7 @@ def generate_models(raw_df,host,user,password,port,db, plot_comp=True,plot_tree=
 
             except Exception as e:
                 print("Exception posting testing and training data: {}".format(e))
-                
-            #One hot encoding of Weather Type
-            #station_dataframe=pd.get_dummies(station_dataframe, drop_first=True)
-            #station_train_df=pd.get_dummies(station_train_df, drop_first=True)
-            #station_test_df=pd.get_dummies(station_test_df, drop_first=True)
-            
+
             
             #Get station model
             model_result=create_xgboost_model(fulldf=station_dataframe,train_df=station_train_df,test_df=station_test_df,target_column='available_bikes',station_number=station_number,plot_comp=plot_comp,plot_tree=plot_tree)
@@ -1930,11 +1942,10 @@ def generate_models(raw_df,host,user,password,port,db, plot_comp=True,plot_tree=
         #Pass Station
         else:
             print("No Data: {}".format(station_number))
-
-    engine.dispose()        
+            
+    engine.dispose()
     
     return station_dataframe_model_list
-
 
 def wrap_generate_models(host,user,password,port,db, plot_comp=False,plot_tree=False):
     """A function to run the model generation"""
@@ -2016,9 +2027,6 @@ def get_forecast_for_time(host,user,password,port,db,station_no,timestamp):
         print("Unexpected failure: {}".format(e))
         
     return data_df
-
-
-
 
 def getWeatherForecast(latitude, longitude):
     """Function to return the weather forecast for certain co-ordinates"""
@@ -2318,9 +2326,12 @@ def predict_from_station_time(weather_data,station_number,timestamp):
     print(staging_df.dtypes)
 
     staging_df=staging_df[['weather_type_id',
+ 'minute',
  'hour',
  'dayofweek',
  'dayofmonth',
+ 'month',
+ 'year',
  'bool_weekend',
  'bool_dayoff',
  'bool_workhour',
@@ -2332,8 +2343,20 @@ def predict_from_station_time(weather_data,station_number,timestamp):
  'weather_air_pressure']]
 
     #Had to swap to linear model as XGBoost is not loading due to save
-    loaded_model = pickle.load(open('./predictive_models/lin_model_station_{}.pickle'.format(station_number), 'rb'))
-    print(staging_df.columns)
-    result = loaded_model.predict(staging_df)
-    
+    try:
+        loaded_model=xg.XGBRegressor()
+        loaded_model.load_model(fname='./predictive_models/xg_model_station_{}.pickle'.format(station_number))
+        print(loaded_model)
+        print(staging_df.columns)
+        result = loaded_model.predict(staging_df)
+        print(result)
+        print(type(result))
+        result=list(result)
+
+    except Exception as e:
+        print(e)
+        loaded_model = pickle.load(open('./predictive_models/lin_model_station_{}.pickle'.format(station_number), 'rb'))
+        print(staging_df.columns)
+        result = loaded_model.predict(staging_df)    
+
     return result

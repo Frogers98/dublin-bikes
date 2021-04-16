@@ -289,7 +289,7 @@ def getPrediction(requested_time, no):
     # Turns that into a json
     print(int(prediction_data[0]))
     
-    result = json.dumps(round(prediction_data[0]))
+    result = json.dumps(str(round(int(prediction_data[0]))))
     return result
 
 
